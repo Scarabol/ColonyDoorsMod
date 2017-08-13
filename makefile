@@ -1,6 +1,6 @@
 # important variables
 modname = Doors
-version = 0.9.1
+version = 1.0
 
 moddir = Scarabol/$(modname)
 zipname = Colony$(modname)Mod-$(version)-mods.zip
