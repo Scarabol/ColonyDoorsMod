@@ -1,0 +1,14 @@
+{
+  "woodendoor" : {
+    "albedo" : "woodendoorbottom",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  },
+  "woodendoortop" : {
+    "albedo" : "woodendoortop",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  }
+}
