@@ -189,18 +189,15 @@ namespace ScarabolMods
           string xz = wasTypeName.Substring(wasTypeName.Length-2); // e.g. z+
           string doorBaseName = wasTypeName.Substring(0, wasTypeName.Length-2); // e.g. mods.scarabol.doors.woodendoor
           string newTypeName = doorBaseName + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoor.openz+
-          // TODO disable debug msg
-          Chat.Send(causedBy, string.Format("You opened a {0} at {1}, will change to {2}", wasTypeName, position, newTypeName));
+//          Chat.Send(causedBy, string.Format("You opened a {0} at {1}, will change to {2}", wasTypeName, position, newTypeName));
           ServerManager.TryChangeBlock(position, ItemTypes.IndexLookup.GetIndex(newTypeName));
-          // other e.g. mods.scarabol.doors.woodendoortopz+
           Vector3Int otherPos = position.Add(0, 1, 0);
           string otherName = doorBaseName + "top" + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoortop.openz+
           if (doorBaseName.EndsWith("top")) {
             otherPos = position.Add(0, -1, 0);
             otherName = doorBaseName.Substring(0, doorBaseName.Length-"top".Length) + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoor.openz+
           }
-          // TODO disable debug msg
-          Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
+//          Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
           ServerManager.TryChangeBlock(otherPos, ItemTypes.IndexLookup.GetIndex(otherName));
         } else {
           Pipliz.Log.Write(string.Format("OnOpenAction called by nobody"));
@@ -219,18 +216,15 @@ namespace ScarabolMods
           string xz = wasTypeName.Substring(wasTypeName.Length-2);
           string doorBaseName = wasTypeBaseName.Substring(0, wasTypeBaseName.Length-DoorsModEntries.OPEN_SUFFIX.Length);
           string newTypeName = doorBaseName + xz;
-          // TODO disable debug msg
-          Chat.Send(causedBy, string.Format("You closed a {0} at {1}, will change to {2}", wasTypeName, position, newTypeName));
+//          Chat.Send(causedBy, string.Format("You closed a {0} at {1}, will change to {2}", wasTypeName, position, newTypeName));
           ServerManager.TryChangeBlock(position, ItemTypes.IndexLookup.GetIndex(newTypeName));
-          // other e.g. mods.scarabol.doors.woodendoortopz+
           Vector3Int otherPos = position.Add(0, 1, 0);
           string otherName = doorBaseName + "top" + xz;
           if (doorBaseName.EndsWith("top")) {
             otherPos = position.Add(0, -1, 0);
             otherName = doorBaseName.Substring(0, doorBaseName.Length-"top".Length) + xz;
           }
-          // TODO disable debug msg
-          Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
+//          Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
           ServerManager.TryChangeBlock(otherPos, ItemTypes.IndexLookup.GetIndex(otherName));
         } else {
           Pipliz.Log.Write(string.Format("OnCloseAction called by nobody"));
@@ -246,8 +240,7 @@ namespace ScarabolMods
         if (causedBy != null) {
           string doorTypeName = ItemTypes.IndexLookup.GetName(doorType);
           string aboveTypeName = doorTypeName.Substring(0, doorTypeName.Length-2) + "top" + doorTypeName.Substring(doorTypeName.Length-2);
-          // TODO disable debug msg
-          Chat.Send(causedBy, string.Format("You placed a {0} will place {1} above", doorTypeName, aboveTypeName));
+//          Chat.Send(causedBy, string.Format("You placed a {0} will place {1} above", doorTypeName, aboveTypeName));
           ServerManager.TryChangeBlock(position.Add(0, 1, 0), ItemTypes.IndexLookup.GetIndex(aboveTypeName));
         } else {
           Pipliz.Log.Write(string.Format("Door placed by nobody"));

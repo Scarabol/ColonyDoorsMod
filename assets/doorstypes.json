@@ -10,22 +10,22 @@
   },
   "woodendoorx+" : {
     "parentType" : "woodendoor",
-    "mesh" : "woodendoorbottomx-.obj",
-    "mesh.open" : "woodendoorbottom-mz-.obj",
-  },
-  "woodendoorx-" : {
-    "parentType" : "woodendoor",
     "mesh" : "woodendoorbottomx+.obj",
     "mesh.open" : "woodendoorbottom-mz+.obj",
   },
+  "woodendoorx-" : {
+    "parentType" : "woodendoor",
+    "mesh" : "woodendoorbottomx-.obj",
+    "mesh.open" : "woodendoorbottom-mz-.obj",
+  },
   "woodendoorz+" : {
     "parentType" : "woodendoor",
-    "mesh" : "woodendoorbottomz-.obj",
+    "mesh" : "woodendoorbottomz+.obj",
     "mesh.open" : "woodendoorbottom-mx+.obj",
   },
   "woodendoorz-" : {
     "parentType" : "woodendoor",
-    "mesh" : "woodendoorbottomz+.obj",
+    "mesh" : "woodendoorbottomz-.obj",
     "mesh.open" : "woodendoorbottom-mx-.obj",
   },
   "woodendoortop" : {
@@ -36,22 +36,22 @@
   },
   "woodendoortopx+" : {
     "parentType" : "woodendoortop",
-    "mesh" : "woodendoortopx-.obj",
-    "mesh.open" : "woodendoortop-mz-.obj",
-  },
-  "woodendoortopx-" : {
-    "parentType" : "woodendoortop",
     "mesh" : "woodendoortopx+.obj",
     "mesh.open" : "woodendoortop-mz+.obj",
   },
+  "woodendoortopx-" : {
+    "parentType" : "woodendoortop",
+    "mesh" : "woodendoortopx-.obj",
+    "mesh.open" : "woodendoortop-mz-.obj",
+  },
   "woodendoortopz+" : {
     "parentType" : "woodendoortop",
-    "mesh" : "woodendoortopz-.obj",
+    "mesh" : "woodendoortopz+.obj",
     "mesh.open" : "woodendoortop-mx+.obj",
   },
   "woodendoortopz-" : {
     "parentType" : "woodendoortop",
-    "mesh" : "woodendoortopz+.obj",
+    "mesh" : "woodendoortopz-.obj",
     "mesh.open" : "woodendoortop-mx-.obj",
   }
 }

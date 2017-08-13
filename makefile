@@ -21,7 +21,7 @@ all: clean default
 
 release: default
 	rm -f "$(zipname)"
-	cd ../../ && zip -r "$(moddir)/$(zipname)" "$(moddir)/modInfo.json" "$(moddir)/$(dllname)" "$(moddir)/blueprints/" "$(moddir)/assets/"
+	cd ../../ && zip -r "$(moddir)/$(zipname)" "$(moddir)/modInfo.json" "$(moddir)/$(dllname)" "$(moddir)/assets/"
 
 client: default
 	cd ../../../../ && ./colonyclient.x86_64
