@@ -7,7 +7,19 @@
   },
   "woodendoortop" : {
     "albedo" : "woodendoortop",
+    "normal" : "woodendoortop",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  },
+  "woodendoor2" : {
+    "albedo" : "woodendoorbottom",
     "normal" : "woodendoorbottom",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  },
+  "woodendoor2top" : {
+    "albedo" : "woodendoortop",
+    "normal" : "woodendoortop",
     "emissive" : "neutral",
     "height" : "neutral"
   }

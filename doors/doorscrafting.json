@@ -2,5 +2,9 @@
   {
     "results":[{"type":"woodendoor"}],
     "requires":[{"type":"planks","amount":2}]
+  },
+  {
+    "results":[{"type":"woodendoor2"}],
+    "requires":[{"type":"planks","amount":2}]
   }
 ]

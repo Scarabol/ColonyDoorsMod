@@ -53,5 +53,60 @@
     "parentType" : "woodendoortop",
     "mesh" : "woodendoortopz-.obj",
     "mesh.open" : "woodendoortop-mx-.obj",
+  },
+  "woodendoor2" : {
+    "onPlaceAudio" : "woodPlace",
+    "onRemoveAudio" : "woodDeleteLight",
+    "icon" : "woodendoor.png",
+    "rotatablex+" : "woodendoor2x+",
+    "rotatablex-" : "woodendoor2x-",
+    "rotatablez+" : "woodendoor2z+",
+    "rotatablez-" : "woodendoor2z-"
+  },
+  "woodendoor2x+" : {
+    "parentType" : "woodendoor2",
+    "mesh" : "woodendoorbottom-mx-.obj",
+    "mesh.open" : "woodendoorbottomz-.obj",
+  },
+  "woodendoor2x-" : {
+    "parentType" : "woodendoor2",
+    "mesh" : "woodendoorbottom-mx+.obj",
+    "mesh.open" : "woodendoorbottomz+.obj",
+  },
+  "woodendoor2z+" : {
+    "parentType" : "woodendoor2",
+    "mesh" : "woodendoorbottom-mz-.obj",
+    "mesh.open" : "woodendoorbottomx-.obj",
+  },
+  "woodendoor2z-" : {
+    "parentType" : "woodendoor2",
+    "mesh" : "woodendoorbottomx+.obj",
+    "mesh.open" : "woodendoorbottom-mz+.obj",
+  },
+  "woodendoor2top" : {
+    "rotatablex+" : "woodendoor2topx+",
+    "rotatablex-" : "woodendoor2topx-",
+    "rotatablez+" : "woodendoor2topz+",
+    "rotatablez-" : "woodendoor2topz-"
+  },
+  "woodendoor2topx+" : {
+    "parentType" : "woodendoor2top",
+    "mesh" : "woodendoortop-mx-.obj",
+    "mesh.open" : "woodendoortopz-.obj",
+  },
+  "woodendoor2topx-" : {
+    "parentType" : "woodendoor2top",
+    "mesh" : "woodendoortop-mx+.obj",
+    "mesh.open" : "woodendoortopz+.obj",
+  },
+  "woodendoor2topz+" : {
+    "parentType" : "woodendoor2top",
+    "mesh" : "woodendoortop-mz-.obj",
+    "mesh.open" : "woodendoortopx-.obj",
+  },
+  "woodendoor2topz-" : {
+    "parentType" : "woodendoor2top",
+    "mesh" : "woodendoortop-mz+.obj",
+    "mesh.open" : "woodendoortopx+.obj",
   }
 }
