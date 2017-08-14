@@ -22,5 +22,11 @@
     "normal" : "woodendoortop",
     "emissive" : "neutral",
     "height" : "neutral"
+  },
+  "woodgate" : {
+    "albedo" : "woodgate",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
   }
 }

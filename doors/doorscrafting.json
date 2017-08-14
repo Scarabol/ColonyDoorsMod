@@ -6,5 +6,9 @@
   {
     "results":[{"type":"woodendoor2"}],
     "requires":[{"type":"planks","amount":2}]
+  },
+  {
+    "results":[{"type":"woodgate"}],
+    "requires":[{"type":"planks","amount":3}]
   }
 ]

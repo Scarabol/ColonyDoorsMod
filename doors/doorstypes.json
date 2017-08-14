@@ -112,5 +112,34 @@
     "parentType" : "woodendoor2top",
     "mesh" : "woodendoortop-mz+.obj",
     "mesh.open" : "woodendoortopx+.obj",
+  },
+  "woodgate" : {
+    "icon" : "woodgate.png",
+    "onPlaceAudio" : "woodPlace",
+    "onRemoveAudio" : "woodDeleteLight",
+    "rotatablex+" : "woodgatex+",
+    "rotatablex-" : "woodgatex-",
+    "rotatablez+" : "woodgatez+",
+    "rotatablez-" : "woodgatez-"
+  },
+  "woodgatex+" : {
+    "parentType" : "woodgate",
+    "mesh" : "woodgateclosedx+.obj",
+    "mesh.open" : "woodgateopenx+.obj"
+  },
+  "woodgatex-" : {
+    "parentType" : "woodgate",
+    "mesh" : "woodgateclosedx-.obj",
+    "mesh.open" : "woodgateopenx-.obj"
+  },
+  "woodgatez+" : {
+    "parentType" : "woodgate",
+    "mesh" : "woodgateclosedz+.obj",
+    "mesh.open" : "woodgateopenz+.obj"
+  },
+  "woodgatez-" : {
+    "parentType" : "woodgate",
+    "mesh" : "woodgateclosedz-.obj",
+    "mesh.open" : "woodgateopenz-.obj"
   }
 }

@@ -283,12 +283,17 @@ namespace ScarabolMods
           ServerManager.TryChangeBlock(position, ItemTypes.IndexLookup.GetIndex(newTypeName));
           Vector3Int otherPos = position.Add(0, 1, 0);
           string otherName = doorBaseName + "top" + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoortop.openz+
+          string otherWasTypeName = doorBaseName + "top" + xz; // e.g. mods.scarabol.doors.woodendoortopz+
           if (doorBaseName.EndsWith("top")) {
             otherPos = position.Add(0, -1, 0);
             otherName = doorBaseName.Substring(0, doorBaseName.Length-"top".Length) + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoor.openz+
+            otherWasTypeName = doorBaseName.Substring(0, doorBaseName.Length-"top".Length) + xz; // e.g. mods.scarabol.doors.woodendoortopz+
           }
-//          Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
-          ServerManager.TryChangeBlock(otherPos, ItemTypes.IndexLookup.GetIndex(otherName));
+          ushort actualOtherWasType;
+          if (World.TryGetTypeAt(otherPos, out actualOtherWasType) && actualOtherWasType == ItemTypes.IndexLookup.GetIndex(otherWasTypeName)) {
+//            Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
+            ServerManager.TryChangeBlock(otherPos, ItemTypes.IndexLookup.GetIndex(otherName));
+          }
         } else {
           Pipliz.Log.Write(string.Format("OnOpenAction called by nobody"));
         }
@@ -316,12 +321,17 @@ namespace ScarabolMods
           ServerManager.TryChangeBlock(position, ItemTypes.IndexLookup.GetIndex(newTypeName));
           Vector3Int otherPos = position.Add(0, 1, 0);
           string otherName = doorBaseName + "top" + xz;
+          string otherWasTypeName = doorBaseName + "top" + DoorsModEntries.OPEN_SUFFIX + xz;
           if (doorBaseName.EndsWith("top")) {
             otherPos = position.Add(0, -1, 0);
             otherName = doorBaseName.Substring(0, doorBaseName.Length-"top".Length) + xz;
+            otherWasTypeName = doorBaseName.Substring(0, doorBaseName.Length-"top".Length) + DoorsModEntries.OPEN_SUFFIX + xz;
           }
-//          Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
-          ServerManager.TryChangeBlock(otherPos, ItemTypes.IndexLookup.GetIndex(otherName));
+          ushort actualOtherWasType;
+          if (World.TryGetTypeAt(otherPos, out actualOtherWasType) && actualOtherWasType == ItemTypes.IndexLookup.GetIndex(otherWasTypeName)) {
+//            Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
+            ServerManager.TryChangeBlock(otherPos, ItemTypes.IndexLookup.GetIndex(otherName));
+          }
         } else {
           Pipliz.Log.Write(string.Format("OnCloseAction called by nobody"));
         }
