@@ -283,6 +283,12 @@ namespace ScarabolMods
     public static void OnCloseAction(Vector3Int position, ushort wasType, Players.Player causedBy)
     {
       try {
+        Players.Player closest;
+        if ((Players.TryFindClosest(position.Vector, out closest) && Pipliz.Math.ManhattanDistance(position, new Vector3Int(closest.Position)) < 2) ||
+            (Players.TryFindClosest(position.Add(0, 1, 0).Vector, out closest) && Pipliz.Math.ManhattanDistance(position.Add(0, 1, 0), new Vector3Int(closest.Position)) < 2)) {
+          ServerManager.TryChangeBlock(position, wasType);
+          return;
+        }
         if (causedBy != null) {
           string wasTypeName = ItemTypes.IndexLookup.GetName(wasType); // e.g. mods.scarabol.doors.woodendoor.openz+
           string wasTypeBaseName = wasTypeName.Substring(0, wasTypeName.Length-2);
