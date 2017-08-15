@@ -223,7 +223,7 @@ namespace ScarabolMods
     public static void OnAddRam(Vector3Int position, ushort wasType, Players.Player causedBy)
     {
       try {
-        Chat.Send(causedBy, string.Format("You placed a doorram at {0} this door will be gone in 5 seconds...", position));
+        Chat.Send(causedBy, string.Format("You placed a doorram. This door will be gone in 5 seconds...", position));
         ThreadManager.InvokeOnMainThread(delegate ()
         {
           string dir = ItemTypes.IndexLookup.GetName(wasType);
@@ -247,7 +247,7 @@ namespace ScarabolMods
           }
         }, 5.0);
       } catch (Exception exception) {
-        Pipliz.Log.WriteError(string.Format("Exception in OnAddRam; {1}", exception.Message));
+        Pipliz.Log.WriteError(string.Format("Exception in OnAddRam; {0}", exception.Message));
       }
     }
   }
@@ -276,7 +276,7 @@ namespace ScarabolMods
           Pipliz.Log.Write(string.Format("OnOpenAction called by nobody"));
         }
       } catch (Exception exception) {
-        Pipliz.Log.WriteError(string.Format("Exception in OnOpenAction; {1}", exception.Message));
+        Pipliz.Log.WriteError(string.Format("Exception in OnOpenAction; {0}", exception.Message));
       }
     }
 
@@ -303,7 +303,7 @@ namespace ScarabolMods
           Pipliz.Log.Write(string.Format("OnCloseAction called by nobody"));
         }
       } catch (Exception exception) {
-        Pipliz.Log.WriteError(string.Format("Exception in OnCloseAction; {1}", exception.Message));
+        Pipliz.Log.WriteError(string.Format("Exception in OnCloseAction; {0}", exception.Message));
       }
     }
 
@@ -319,7 +319,7 @@ namespace ScarabolMods
           Pipliz.Log.Write(string.Format("Door placed by nobody"));
         }
       } catch (Exception exception) {
-        Pipliz.Log.WriteError(string.Format("Exception in OnAddDoor; {1}", exception.Message));
+        Pipliz.Log.WriteError(string.Format("Exception in OnAddDoor; {0}", exception.Message));
       }
     }
   }
