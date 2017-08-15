@@ -17,15 +17,15 @@ namespace ScarabolMods
     private static string MOD_PREFIX = "mods.scarabol.doors.";
     public static string OPEN_SUFFIX = ".open";
     public static string ModDirectory;
-    private static string AssetsDirectory;
+    private static string DoorsDirectory;
     private static List<string> doorTypeKeys = new List<string>();
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.doors.assemblyload")]
     public static void OnAssemblyLoaded(string path)
     {
       ModDirectory = Path.GetDirectoryName(path);
-      AssetsDirectory = Path.Combine(ModDirectory, "assets");
-      ModLocalizationHelper.localize(Path.Combine(AssetsDirectory, "localization"), MOD_PREFIX, false);
+      DoorsDirectory = Path.Combine(ModDirectory, "doors");
+      ModLocalizationHelper.localize(Path.Combine(DoorsDirectory, "localization"), MOD_PREFIX, false);
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterStartup, "scarabol.doors.registercallbacks")]
@@ -38,13 +38,13 @@ namespace ScarabolMods
     public static void AfterAddingBaseTypes()
     {
       // TODO this is realy hacky (maybe better in future ModAPI)
-      string relativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(AssetsDirectory, "textures"))).OriginalString;
+      string relativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(DoorsDirectory, "textures"))).OriginalString;
       Pipliz.Log.Write(string.Format("Doors relative textures path is {0}", relativeTexturesPath));
-      string relativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(AssetsDirectory, "meshes"))).OriginalString;
+      string relativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(DoorsDirectory, "meshes"))).OriginalString;
       Pipliz.Log.Write(string.Format("Doors relative meshes path is {0}", relativeMeshesPath));
       Pipliz.Log.Write(string.Format("Started loading door texture mappings..."));
       JSONNode jsonTextureMapping;
-      Pipliz.JSON.JSON.Deserialize(Path.Combine(AssetsDirectory, "doorstexturemapping.json"), out jsonTextureMapping, true);
+      Pipliz.JSON.JSON.Deserialize(Path.Combine(DoorsDirectory, "doorstexturemapping.json"), out jsonTextureMapping, true);
       if (jsonTextureMapping.NodeType == NodeType.Object) {
         foreach (KeyValuePair<string,JSONNode> textureEntry in jsonTextureMapping.LoopObject()) {
           try {
@@ -70,7 +70,7 @@ namespace ScarabolMods
       }
       Pipliz.Log.Write(string.Format("Started loading door types..."));
       JSONNode jsonTypes;
-      Pipliz.JSON.JSON.Deserialize(Path.Combine(AssetsDirectory, "doorstypes.json"), out jsonTypes, true);
+      Pipliz.JSON.JSON.Deserialize(Path.Combine(DoorsDirectory, "doorstypes.json"), out jsonTypes, true);
       if (jsonTypes.NodeType == NodeType.Object) {
         foreach (KeyValuePair<string,JSONNode> typeEntry in jsonTypes.LoopObject()) {
           try {
@@ -79,7 +79,7 @@ namespace ScarabolMods
               string icon;
               if (typeEntry.Value.TryGetAs("icon", out icon) && suffix.Length < 1) {
                 // TODO try to use relative path here, too?
-                string realicon = MultiPath.Combine(AssetsDirectory, "icons", icon);
+                string realicon = MultiPath.Combine(DoorsDirectory, "icons", icon);
                 Pipliz.Log.Write(string.Format("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                 jsonType.SetAs("icon", realicon);
               }
@@ -99,7 +99,7 @@ namespace ScarabolMods
               if (!(typeEntry.Key.EndsWith("x+") || typeEntry.Key.EndsWith("x-") || typeEntry.Key.EndsWith("z+") || typeEntry.Key.EndsWith("z-"))) {
                 jsonType
                   .SetAs<bool>("isSolid", suffix.Length < 1)
-                  .SetAs<bool>("needsBase", !typeEntry.Key.EndsWith("top")) // TODO don't set this for top and topright elements
+                  .SetAs<bool>("needsBase", false)
                   .SetAs<int>("destructionTime", 200)
                   .SetAs("onRemove", new JSONNode(NodeType.Array))
                   .SetAs<bool>("isRotatable", true)
@@ -158,7 +158,7 @@ namespace ScarabolMods
       try {
         Pipliz.Log.Write(string.Format("Started loading door recipes..."));
         JSONNode jsonCrafting;
-        Pipliz.JSON.JSON.Deserialize(Path.Combine(AssetsDirectory, "doorscrafting.json"), out jsonCrafting, true);
+        Pipliz.JSON.JSON.Deserialize(Path.Combine(DoorsDirectory, "doorscrafting.json"), out jsonCrafting, true);
         if (jsonCrafting.NodeType == NodeType.Array) {
           foreach (JSONNode craftingEntry in jsonCrafting.LoopArray()) {
             JSONNode jsonResults = craftingEntry.GetAs<JSONNode>("results");
