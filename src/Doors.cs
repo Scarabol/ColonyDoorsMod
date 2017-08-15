@@ -14,9 +14,10 @@ namespace ScarabolMods
   [ModLoader.ModManager]
   public static class DoorsModEntries
   {
-    private static string MOD_PREFIX = "mods.scarabol.doors.";
+    public static string MOD_PREFIX = "mods.scarabol.doors.";
     public static string OPEN_SUFFIX = ".open";
     public static string ModDirectory;
+    private static string AssetsDirectory;
     private static string DoorsDirectory;
     private static List<string> doorTypeKeys = new List<string>();
 
@@ -24,6 +25,8 @@ namespace ScarabolMods
     public static void OnAssemblyLoaded(string path)
     {
       ModDirectory = Path.GetDirectoryName(path);
+      AssetsDirectory = Path.Combine(ModDirectory, "assets");
+      ModLocalizationHelper.localize(Path.Combine(AssetsDirectory, "localization"), "mods.scarabol.assets.", false);
       DoorsDirectory = Path.Combine(ModDirectory, "doors");
       ModLocalizationHelper.localize(Path.Combine(DoorsDirectory, "localization"), MOD_PREFIX, false);
     }
@@ -67,6 +70,33 @@ namespace ScarabolMods
             Pipliz.Log.WriteError(string.Format("Exception while loading from {0}; {1}", "doorstexturemapping.json", exception.Message));
           }
         }
+      }
+      // TODO this is realy hacky (maybe better in future ModAPI)
+      string relativeAssetsTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(AssetsDirectory, "textures"))).OriginalString;
+      ItemTypesServer.AddTextureMapping(MOD_PREFIX + "doorram", new JSONNode()
+        .SetAs("albedo", MultiPath.Combine(relativeAssetsTexturesPath, "albedo", "doorram"))
+        .SetAs("normal", "neutral")
+        .SetAs("emissive", "neutral")
+        .SetAs("height", "neutral")
+      );
+      ItemTypes.AddRawType(MOD_PREFIX + "doorram",
+        new JSONNode(NodeType.Object)
+                           .SetAs<bool>("isRotatable", true)
+                           .SetAs<bool>("needsBase", true)
+                           .SetAs("sideall", "SELF")
+                           .SetAs("icon", MultiPath.Combine(AssetsDirectory, "icons", "doorram.png"))
+                           .SetAs("rotatablex+", MOD_PREFIX + "doorramx+")
+                           .SetAs("rotatablex-", MOD_PREFIX + "doorramx-")
+                           .SetAs("rotatablez+", MOD_PREFIX + "doorramz+")
+                           .SetAs("rotatablez-", MOD_PREFIX + "doorramz-")
+      );
+      string relativeAssetsMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(AssetsDirectory, "meshes"))).OriginalString;
+      foreach (string xz in new string[] { "x+", "x-", "z+", "z-" }) {
+        ItemTypes.AddRawType(MOD_PREFIX + "doorram" + xz,
+          new JSONNode(NodeType.Object)
+                             .SetAs("parentType", MOD_PREFIX + "doorram")
+                             .SetAs("mesh", Path.Combine(relativeAssetsMeshesPath, "doorram" + xz + ".obj"))
+        );
       }
       Pipliz.Log.Write(string.Format("Started loading door types..."));
       JSONNode jsonTypes;
@@ -139,6 +169,7 @@ namespace ScarabolMods
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesServer, "scarabol.doors.registertypes")]
     public static void AfterItemTypesServer()
     {
+      ItemTypesServer.RegisterOnAdd(MOD_PREFIX + "doorram", RamBlockCode.OnAddRam);
       foreach (string typekey in doorTypeKeys) {
         if (!typekey.EndsWith("top")) {
           Pipliz.Log.Write(string.Format("Registering OnAddDoor as OnAdd for '{0}'", typekey));
@@ -156,6 +187,14 @@ namespace ScarabolMods
     public static void AfterItemTypesDefined()
     {
       try {
+        JSONNode jsonCraftingRamRecipe = new JSONNode()
+          .SetAs("results", new JSONNode(NodeType.Array)
+                 .AddToArray(new JSONNode().SetAs("type", MOD_PREFIX + "doorram")))
+          .SetAs("requires", new JSONNode(NodeType.Array)
+                 .AddToArray(new JSONNode().SetAs("type", "planks"))
+                 .AddToArray(new JSONNode().SetAs("type", "stonebricks").SetAs<int>("amount", 2))
+                );
+        RecipePlayer.AllRecipes.Add(new Recipe(jsonCraftingRamRecipe));
         Pipliz.Log.Write(string.Format("Started loading door recipes..."));
         JSONNode jsonCrafting;
         Pipliz.JSON.JSON.Deserialize(Path.Combine(DoorsDirectory, "doorscrafting.json"), out jsonCrafting, true);
@@ -175,6 +214,40 @@ namespace ScarabolMods
         }
       } catch (Exception exception) {
         Pipliz.Log.WriteError(string.Format("Exception while loading door recipes from {0}; {1}", "doorscrafting.json", exception.Message));
+      }
+    }
+  }
+
+  static class RamBlockCode
+  {
+    public static void OnAddRam(Vector3Int position, ushort wasType, Players.Player causedBy)
+    {
+      try {
+        Chat.Send(causedBy, string.Format("You placed a doorram at {0} this door will be gone in 5 seconds...", position));
+        ThreadManager.InvokeOnMainThread(delegate ()
+        {
+          string dir = ItemTypes.IndexLookup.GetName(wasType);
+          string xz = dir.Substring(dir.Length - 2);
+          ushort realType;
+          if (World.TryGetTypeAt(position, out realType) && realType == ItemTypes.IndexLookup.GetIndex(DoorsModEntries.MOD_PREFIX + "doorram" + xz)) {
+            Chat.Send(causedBy, string.Format("BAM!!!", position));
+            int ox = 0, oz = 0;
+            if (xz.Equals("x+")) {
+              ox = 1;
+            } else if (xz.Equals("x-")) {
+              ox = -1;
+            } else if (xz.Equals("z-")) {
+              oz = -1;
+            } else {
+              oz = 1;
+            }
+            ServerManager.TryChangeBlock(position, ItemTypes.IndexLookup.GetIndex("air"));
+            ServerManager.TryChangeBlock(position.Add(ox, 0, oz), ItemTypes.IndexLookup.GetIndex("air"));
+            ServerManager.TryChangeBlock(position.Add(ox, 1, oz), ItemTypes.IndexLookup.GetIndex("air"));
+          }
+        }, 5.0);
+      } catch (Exception exception) {
+        Pipliz.Log.WriteError(string.Format("Exception in OnAddRam; {1}", exception.Message));
       }
     }
   }

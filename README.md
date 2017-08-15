@@ -1,6 +1,6 @@
 # Colony Survival Doors Mod by Scarabol
 
-## Special thanks to *Xweert123* for creating the woodendoor assets
+## Special thanks to *Xweert123* for creating the woodendoor and doorram assets
 * [Xweert123 on Instagram](https://www.instagram.com/xweert123)
 * [Xweert123 on Youtube](https://www.youtube.com/user/xweert711)
 
@@ -21,7 +21,7 @@ To add a doors, place icons, meshes, textures and crafting recipes in the subfol
 
 ## Howto Remove Doors
 
-Not yet implemented.
+Craft a ram and let it go!
 
 ## Build
 
