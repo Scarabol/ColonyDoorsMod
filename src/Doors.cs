@@ -146,6 +146,23 @@ namespace ScarabolMods
                     Pipliz.Log.WriteError(string.Format("Attribute {0} not found for base type {1}", rotatable, typeEntry.Key));
                   }
                 }
+                if (suffix.Length < 1) {
+                  foreach (string propName in new string[] { "onDoorOpenAudio", "onRemoveAudio" }) {
+                    string openAudio;
+                    if (typeEntry.Value.TryGetAs(propName, out openAudio)) {
+                      jsonType.SetAs("onRemoveAudio", openAudio);
+                      break;
+                    }
+                  }
+                } else {
+                  foreach (string propName in new string[] { "onDoorCloseAudio", "onPlaceAudio" }) {
+                    string closeAudio;
+                    if (typeEntry.Value.TryGetAs(propName, out closeAudio)) {
+                      jsonType.SetAs("onRemoveAudio", closeAudio);
+                      break;
+                    }
+                  }
+                }
                 realkey = MOD_PREFIX + typeEntry.Key + suffix;
                 Pipliz.Log.Write(string.Format("Adding door base type '{0}'", realkey));
                 if (suffix.Length < 1) {

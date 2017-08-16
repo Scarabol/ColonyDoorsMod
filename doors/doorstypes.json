@@ -29,6 +29,8 @@
     "mesh.open" : "woodendoorbottom-mx-.obj",
   },
   "woodendoortop" : {
+    "onPlaceAudio" : "woodPlace",
+    "onRemoveAudio" : "woodDeleteLight",
     "rotatablex+" : "woodendoortopx+",
     "rotatablex-" : "woodendoortopx-",
     "rotatablez+" : "woodendoortopz+",
@@ -84,6 +86,8 @@
     "mesh.open" : "woodendoorbottom-mz+.obj",
   },
   "woodendoor2top" : {
+    "onPlaceAudio" : "woodPlace",
+    "onRemoveAudio" : "woodDeleteLight",
     "rotatablex+" : "woodendoor2topx+",
     "rotatablex-" : "woodendoor2topx-",
     "rotatablez+" : "woodendoor2topz+",
