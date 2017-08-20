@@ -20,6 +20,7 @@ namespace ScarabolMods
     private static string AssetsDirectory;
     private static string DoorsDirectory;
     private static List<string> doorTypeKeys = new List<string>();
+    private static List<Recipe> doorRecipes = new List<Recipe>();
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.doors.assemblyload")]
     public static void OnAssemblyLoaded(string path)
@@ -58,8 +59,8 @@ namespace ScarabolMods
                 string realTextureTypeValue = textureTypeValue;
                 if (!textureTypeValue.Equals("neutral")) {
                   realTextureTypeValue = MultiPath.Combine(relativeTexturesPath, textureType, textureTypeValue);
+                  Pipliz.Log.Write(string.Format("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                 }
-                Pipliz.Log.Write(string.Format("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                 mapping.SetAs(textureType, realTextureTypeValue);
               }
               string realkey = MOD_PREFIX + textureEntry.Key + suffix;
@@ -79,10 +80,9 @@ namespace ScarabolMods
         .SetAs("emissive", "neutral")
         .SetAs("height", "neutral")
       );
-      ItemTypes.AddRawType(MOD_PREFIX + "doorram",
-        new JSONNode(NodeType.Object)
-                           .SetAs<bool>("isRotatable", true)
-                           .SetAs<bool>("needsBase", true)
+      ItemTypes.AddRawType(MOD_PREFIX + "doorram", new JSONNode()
+                           .SetAs("isRotatable", true)
+                           .SetAs("needsBase", true)
                            .SetAs("sideall", "SELF")
                            .SetAs("icon", MultiPath.Combine(AssetsDirectory, "icons", "doorram.png"))
                            .SetAs("rotatablex+", MOD_PREFIX + "doorramx+")
@@ -92,8 +92,7 @@ namespace ScarabolMods
       );
       string relativeAssetsMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(AssetsDirectory, "meshes"))).OriginalString;
       foreach (string xz in new string[] { "x+", "x-", "z+", "z-" }) {
-        ItemTypes.AddRawType(MOD_PREFIX + "doorram" + xz,
-          new JSONNode(NodeType.Object)
+        ItemTypes.AddRawType(MOD_PREFIX + "doorram" + xz, new JSONNode()
                              .SetAs("parentType", MOD_PREFIX + "doorram")
                              .SetAs("mesh", Path.Combine(relativeAssetsMeshesPath, "doorram" + xz + ".obj"))
         );
@@ -128,13 +127,13 @@ namespace ScarabolMods
               string realkey;
               if (!(typeEntry.Key.EndsWith("x+") || typeEntry.Key.EndsWith("x-") || typeEntry.Key.EndsWith("z+") || typeEntry.Key.EndsWith("z-"))) {
                 jsonType
-                  .SetAs<bool>("isSolid", suffix.Length < 1)
-                  .SetAs<bool>("needsBase", false)
-                  .SetAs<int>("destructionTime", 200)
+                  .SetAs("isSolid", suffix.Length < 1)
+                  .SetAs("needsBase", false)
+                  .SetAs("destructionTime", 200)
                   .SetAs("onRemove", new JSONNode(NodeType.Array))
-                  .SetAs<bool>("isRotatable", true)
+                  .SetAs("isRotatable", true)
                   .SetAs("sideall", "SELF")
-                  .SetAs<int>("npcLimit", 0)
+                  .SetAs("npcLimit", 0)
                 ;
                 foreach (string rotatable in new string[] { "rotatablex+", "rotatablex-", "rotatablez+", "rotatablez-" }) {
                   string key;
@@ -183,35 +182,11 @@ namespace ScarabolMods
       }
     }
 
-    [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesServer, "scarabol.doors.registertypes")]
-    public static void AfterItemTypesServer()
-    {
-      ItemTypesServer.RegisterOnAdd(MOD_PREFIX + "doorram", RamBlockCode.OnAddRam);
-      foreach (string typekey in doorTypeKeys) {
-        if (!typekey.EndsWith("top")) {
-          Pipliz.Log.Write(string.Format("Registering OnAddDoor as OnAdd for '{0}'", typekey));
-          ItemTypesServer.RegisterOnAdd(typekey, DoorBlockCode.OnAddDoor);
-        }
-        Pipliz.Log.Write(string.Format("Registering OnOpenAction as OnRemove for '{0}'", typekey));
-        ItemTypesServer.RegisterOnRemove(typekey, DoorBlockCode.OnOpenAction);
-        Pipliz.Log.Write(string.Format("Registering OnCloseAction as OnRemove for '{0}'", typekey + OPEN_SUFFIX));
-        ItemTypesServer.RegisterOnRemove(typekey + OPEN_SUFFIX, DoorBlockCode.OnCloseAction);
-      }
-    }
-
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesDefined, "scarabol.doors.loadrecipes")]
     [ModLoader.ModCallbackProvidesFor("pipliz.apiprovider.registerrecipes")]
     public static void AfterItemTypesDefined()
     {
       try {
-        JSONNode jsonCraftingRamRecipe = new JSONNode()
-          .SetAs("results", new JSONNode(NodeType.Array)
-                 .AddToArray(new JSONNode().SetAs("type", MOD_PREFIX + "doorram")))
-          .SetAs("requires", new JSONNode(NodeType.Array)
-                 .AddToArray(new JSONNode().SetAs("type", "planks"))
-                 .AddToArray(new JSONNode().SetAs("type", "stonebricks").SetAs<int>("amount", 2))
-                );
-        RecipePlayer.AllRecipes.Add(new Recipe(jsonCraftingRamRecipe));
         Pipliz.Log.Write(string.Format("Started loading door recipes..."));
         JSONNode jsonCrafting;
         Pipliz.JSON.JSON.Deserialize(Path.Combine(DoorsDirectory, "doorscrafting.json"), out jsonCrafting, true);
@@ -224,7 +199,7 @@ namespace ScarabolMods
               Pipliz.Log.Write(string.Format("Replacing door recipe result type '{0}' with '{1}'", type, realtype));
               jsonResult.SetAs("type", realtype);
             }
-            RecipePlayer.AllRecipes.Add(new Recipe(craftingEntry));
+            doorRecipes.Add(new Recipe(craftingEntry));
           }
         } else {
           Pipliz.Log.WriteError(string.Format("Expected json array in {0}, but got {1} instead", "doorscrafting.json", jsonCrafting.NodeType));
@@ -233,9 +208,30 @@ namespace ScarabolMods
         Pipliz.Log.WriteError(string.Format("Exception while loading door recipes from {0}; {1}", "doorscrafting.json", exception.Message));
       }
     }
+
+    [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesServer, "scarabol.doors.registertypes")]
+    public static void AfterItemTypesServer()
+    {
+      ItemTypesServer.RegisterOnAdd(MOD_PREFIX + "doorram", RamBlockCode.OnAddRam);
+      foreach (string typekey in doorTypeKeys) {
+        if (!typekey.EndsWith("top")) {
+          ItemTypesServer.RegisterOnAdd(typekey, DoorBlockCode.OnAddDoor);
+        }
+        ItemTypesServer.RegisterOnRemove(typekey, DoorBlockCode.OnOpenAction);
+        ItemTypesServer.RegisterOnRemove(typekey + OPEN_SUFFIX, DoorBlockCode.OnCloseAction);
+      }
+    }
+
+    [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.doors.addplayercrafts")]
+    public static void AfterWorldLoad()
+    {
+      // add recipes here, otherwise they're inserted before vanilla recipes in player crafts
+      RecipePlayer.AllRecipes.Add(new Recipe(new List<InventoryItem>() { new InventoryItem("planks", 1), new InventoryItem("stonebricks", 2) }, new InventoryItem(MOD_PREFIX + "doorram", 1)));
+      RecipePlayer.AllRecipes.AddRange(doorRecipes);
+    }
   }
 
-  static class RamBlockCode
+  public static class RamBlockCode
   {
     public static void OnAddRam(Vector3Int position, ushort wasType, Players.Player causedBy)
     {
@@ -258,9 +254,9 @@ namespace ScarabolMods
             } else {
               oz = 1;
             }
-            ServerManager.TryChangeBlock(position, ItemTypes.IndexLookup.GetIndex("air"));
-            ServerManager.TryChangeBlock(position.Add(ox, 0, oz), ItemTypes.IndexLookup.GetIndex("air"));
-            ServerManager.TryChangeBlock(position.Add(ox, 1, oz), ItemTypes.IndexLookup.GetIndex("air"));
+            ServerManager.TryChangeBlock(position, BlockTypes.Builtin.BuiltinBlocks.Air);
+            ServerManager.TryChangeBlock(position.Add(ox, 0, oz), BlockTypes.Builtin.BuiltinBlocks.Air);
+            ServerManager.TryChangeBlock(position.Add(ox, 1, oz), BlockTypes.Builtin.BuiltinBlocks.Air);
           }
         }, 5.0);
       } catch (Exception exception) {
@@ -269,7 +265,7 @@ namespace ScarabolMods
     }
   }
 
-  static class DoorBlockCode
+  public static class DoorBlockCode
   {
     public static void OnOpenAction(Vector3Int position, ushort wasType, Players.Player causedBy)
     {
