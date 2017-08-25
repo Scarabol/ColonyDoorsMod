@@ -19,6 +19,8 @@ namespace ScarabolMods
     public static string ModDirectory;
     private static string AssetsDirectory;
     private static string DoorsDirectory;
+    private static string RelativeIconsPath;
+    private static string RelativeDoorsIconsPath;
     private static List<string> doorTypeKeys = new List<string>();
     private static List<Recipe> doorRecipes = new List<Recipe>();
 
@@ -30,6 +32,9 @@ namespace ScarabolMods
       ModLocalizationHelper.localize(Path.Combine(AssetsDirectory, "localization"), "mods.scarabol.assets.", false);
       DoorsDirectory = Path.Combine(ModDirectory, "doors");
       ModLocalizationHelper.localize(Path.Combine(DoorsDirectory, "localization"), MOD_PREFIX, false);
+      // TODO this is really hacky (maybe better in future ModAPI)
+      RelativeIconsPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri(new Uri(MultiPath.Combine(ModDirectory, "assets", "icons"))).OriginalString;
+      RelativeDoorsIconsPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri(new Uri(Path.Combine(DoorsDirectory, "icons"))).OriginalString;
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterStartup, "scarabol.doors.registercallbacks")]
@@ -84,7 +89,7 @@ namespace ScarabolMods
                            .SetAs("isRotatable", true)
                            .SetAs("needsBase", true)
                            .SetAs("sideall", "SELF")
-                           .SetAs("icon", MultiPath.Combine(AssetsDirectory, "icons", "doorram.png"))
+                           .SetAs("icon", Path.Combine(RelativeIconsPath, "doorram.png"))
                            .SetAs("rotatablex+", MOD_PREFIX + "doorramx+")
                            .SetAs("rotatablex-", MOD_PREFIX + "doorramx-")
                            .SetAs("rotatablez+", MOD_PREFIX + "doorramz+")
@@ -108,7 +113,7 @@ namespace ScarabolMods
               string icon;
               if (typeEntry.Value.TryGetAs("icon", out icon) && suffix.Length < 1) {
                 // TODO try to use relative path here, too?
-                string realicon = MultiPath.Combine(DoorsDirectory, "icons", icon);
+                string realicon = Path.Combine(RelativeDoorsIconsPath, icon);
                 Pipliz.Log.Write(string.Format("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                 jsonType.SetAs("icon", realicon);
               }
