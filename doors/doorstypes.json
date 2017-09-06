@@ -77,13 +77,13 @@
   },
   "woodendoor2z+" : {
     "parentType" : "woodendoor2",
-    "mesh" : "woodendoorbottom-mz-.obj",
-    "mesh.open" : "woodendoorbottomx-.obj",
+    "mesh" : "woodendoorbottom-mz+.obj",
+    "mesh.open" : "woodendoorbottomx+.obj",
   },
   "woodendoor2z-" : {
     "parentType" : "woodendoor2",
-    "mesh" : "woodendoorbottomx+.obj",
-    "mesh.open" : "woodendoorbottom-mz+.obj",
+    "mesh" : "woodendoorbottom-mz-.obj",
+    "mesh.open" : "woodendoorbottomx-.obj",
   },
   "woodendoor2top" : {
     "onPlaceAudio" : "woodPlace",
@@ -105,13 +105,13 @@
   },
   "woodendoor2topz+" : {
     "parentType" : "woodendoor2top",
-    "mesh" : "woodendoortop-mz-.obj",
-    "mesh.open" : "woodendoortopx-.obj",
+    "mesh" : "woodendoortop-mz+.obj",
+    "mesh.open" : "woodendoortopx+.obj",
   },
   "woodendoor2topz-" : {
     "parentType" : "woodendoor2top",
-    "mesh" : "woodendoortop-mz+.obj",
-    "mesh.open" : "woodendoortopx+.obj",
+    "mesh" : "woodendoortop-mz-.obj",
+    "mesh.open" : "woodendoortopx-.obj",
   },
   "woodgate" : {
     "icon" : "woodgate.png",
