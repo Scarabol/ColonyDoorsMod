@@ -46,7 +46,6 @@ namespace ScarabolMods
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.doors.addrawtypes")]
     public static void AfterAddingBaseTypes ()
     {
-      // TODO this is realy hacky (maybe better in future ModAPI)
       string relativeTexturesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (DoorsDirectory, "textures"))).OriginalString;
       Pipliz.Log.Write (string.Format ("Doors relative textures path is {0}", relativeTexturesPath));
       string relativeMeshesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "meshes", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (DoorsDirectory, "meshes"))).OriginalString;
@@ -77,7 +76,6 @@ namespace ScarabolMods
           }
         }
       }
-      // TODO this is realy hacky (maybe better in future ModAPI)
       string relativeAssetsTexturesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (AssetsDirectory, "textures"))).OriginalString;
       ItemTypesServer.AddTextureMapping (MOD_PREFIX + "doorram", new JSONNode ()
         .SetAs ("albedo", MultiPath.Combine (relativeAssetsTexturesPath, "albedo", "doorram"))
@@ -86,14 +84,14 @@ namespace ScarabolMods
         .SetAs ("height", "neutral")
       );
       ItemTypes.AddRawType (MOD_PREFIX + "doorram", new JSONNode ()
-                           .SetAs ("isRotatable", true)
-                           .SetAs ("needsBase", true)
-                           .SetAs ("sideall", "SELF")
-                           .SetAs ("icon", Path.Combine (RelativeIconsPath, "doorram.png"))
-                           .SetAs ("rotatablex+", MOD_PREFIX + "doorramx+")
-                           .SetAs ("rotatablex-", MOD_PREFIX + "doorramx-")
-                           .SetAs ("rotatablez+", MOD_PREFIX + "doorramz+")
-                           .SetAs ("rotatablez-", MOD_PREFIX + "doorramz-")
+        .SetAs ("isRotatable", true)
+        .SetAs ("needsBase", true)
+        .SetAs ("sideall", "SELF")
+        .SetAs ("icon", Path.Combine (RelativeIconsPath, "doorram.png"))
+        .SetAs ("rotatablex+", MOD_PREFIX + "doorramx+")
+        .SetAs ("rotatablex-", MOD_PREFIX + "doorramx-")
+        .SetAs ("rotatablez+", MOD_PREFIX + "doorramz+")
+        .SetAs ("rotatablez-", MOD_PREFIX + "doorramz-")
       );
       string relativeAssetsMeshesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "meshes", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (AssetsDirectory, "meshes"))).OriginalString;
       foreach (string xz in new string[] { "x+", "x-", "z+", "z-" }) {
@@ -112,7 +110,6 @@ namespace ScarabolMods
               JSONNode jsonType = new JSONNode ();
               string icon;
               if (typeEntry.Value.TryGetAs ("icon", out icon) && suffix.Length < 1) {
-                // TODO try to use relative path here, too?
                 string realicon = Path.Combine (RelativeDoorsIconsPath, icon);
                 Pipliz.Log.Write (string.Format ("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                 jsonType.SetAs ("icon", realicon);
@@ -281,7 +278,6 @@ namespace ScarabolMods
           string xz = wasTypeName.Substring (wasTypeName.Length - 2); // e.g. z+
           string doorBaseName = wasTypeName.Substring (0, wasTypeName.Length - 2); // e.g. mods.scarabol.doors.woodendoor
           string newTypeName = doorBaseName + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoor.openz+
-//          Chat.Send(causedBy, string.Format("You opened a {0} at {1}, will change to {2}", wasTypeName, position, newTypeName));
           ServerManager.TryChangeBlock (position, ItemTypes.IndexLookup.GetIndex (newTypeName));
           Vector3Int otherPos = position.Add (0, 1, 0);
           string otherName = doorBaseName + "top" + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoortop.openz+
@@ -293,7 +289,6 @@ namespace ScarabolMods
           }
           ushort actualOtherWasType;
           if (World.TryGetTypeAt (otherPos, out actualOtherWasType) && actualOtherWasType == ItemTypes.IndexLookup.GetIndex (otherWasTypeName)) {
-//            Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
             ServerManager.TryChangeBlock (otherPos, ItemTypes.IndexLookup.GetIndex (otherName));
           }
         } else {
@@ -319,7 +314,6 @@ namespace ScarabolMods
           string xz = wasTypeName.Substring (wasTypeName.Length - 2);
           string doorBaseName = wasTypeBaseName.Substring (0, wasTypeBaseName.Length - DoorsModEntries.OPEN_SUFFIX.Length);
           string newTypeName = doorBaseName + xz;
-//          Chat.Send(causedBy, string.Format("You closed a {0} at {1}, will change to {2}", wasTypeName, position, newTypeName));
           ServerManager.TryChangeBlock (position, ItemTypes.IndexLookup.GetIndex (newTypeName));
           Vector3Int otherPos = position.Add (0, 1, 0);
           string otherName = doorBaseName + "top" + xz;
@@ -331,7 +325,6 @@ namespace ScarabolMods
           }
           ushort actualOtherWasType;
           if (World.TryGetTypeAt (otherPos, out actualOtherWasType) && actualOtherWasType == ItemTypes.IndexLookup.GetIndex (otherWasTypeName)) {
-//            Chat.Send(causedBy, string.Format("Other door part at {0} is changed to {1}", otherPos, otherName));
             ServerManager.TryChangeBlock (otherPos, ItemTypes.IndexLookup.GetIndex (otherName));
           }
         } else {
@@ -348,7 +341,6 @@ namespace ScarabolMods
         if (causedBy != null) {
           string doorTypeName = ItemTypes.IndexLookup.GetName (doorType);
           string aboveTypeName = doorTypeName.Substring (0, doorTypeName.Length - 2) + "top" + doorTypeName.Substring (doorTypeName.Length - 2);
-//          Chat.Send(causedBy, string.Format("You placed a {0} will place {1} above", doorTypeName, aboveTypeName));
           ServerManager.TryChangeBlock (position.Add (0, 1, 0), ItemTypes.IndexLookup.GetIndex (aboveTypeName));
         } else {
           Pipliz.Log.Write (string.Format ("Door placed by nobody"));
