@@ -5,9 +5,9 @@ using Pipliz;
 using Pipliz.Chatting;
 using Pipliz.JSON;
 using Pipliz.Threading;
-using Pipliz.APIProvider.Recipes;
 using Pipliz.APIProvider.Jobs;
 using NPC;
+using BlockTypes.Builtin;
 
 namespace ScarabolMods
 {
@@ -19,22 +19,18 @@ namespace ScarabolMods
     public static string ModDirectory;
     private static string AssetsDirectory;
     private static string DoorsDirectory;
-    private static string RelativeIconsPath;
-    private static string RelativeDoorsIconsPath;
-    private static List<string> doorTypeKeys = new List<string> ();
-    private static List<Recipe> doorRecipes = new List<Recipe> ();
+    private static List<string> doorClosedTypeKeys = new List<string> ();
+    private static List<string> doorOpenTypeKeys = new List<string> ();
+    private static List<ushort> allDoorTypes = new List<ushort> ();
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.doors.assemblyload")]
     public static void OnAssemblyLoaded (string path)
     {
       ModDirectory = Path.GetDirectoryName (path);
       AssetsDirectory = Path.Combine (ModDirectory, "assets");
-      ModLocalizationHelper.localize (Path.Combine (AssetsDirectory, "localization"), "mods.scarabol.assets.", false);
+      ModLocalizationHelper.localize (Path.Combine (AssetsDirectory, "localization"), "mods.scarabol.assets.");
       DoorsDirectory = Path.Combine (ModDirectory, "doors");
-      ModLocalizationHelper.localize (Path.Combine (DoorsDirectory, "localization"), MOD_PREFIX, false);
-      // TODO this is really hacky (maybe better in future ModAPI)
-      RelativeIconsPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri (new Uri (MultiPath.Combine (ModDirectory, "assets", "icons"))).OriginalString;
-      RelativeDoorsIconsPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (DoorsDirectory, "icons"))).OriginalString;
+      ModLocalizationHelper.localize (Path.Combine (DoorsDirectory, "localization"), MOD_PREFIX);
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterStartup, "scarabol.doors.registercallbacks")]
@@ -44,65 +40,11 @@ namespace ScarabolMods
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.doors.addrawtypes")]
-    public static void AfterAddingBaseTypes ()
+    public static void AfterAddingBaseTypes (Dictionary<string, ItemTypesServer.ItemTypeRaw> itemTypes)
     {
-      string relativeTexturesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (DoorsDirectory, "textures"))).OriginalString;
-      Pipliz.Log.Write (string.Format ("Doors relative textures path is {0}", relativeTexturesPath));
-      string relativeMeshesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "meshes", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (DoorsDirectory, "meshes"))).OriginalString;
-      Pipliz.Log.Write (string.Format ("Doors relative meshes path is {0}", relativeMeshesPath));
-      Pipliz.Log.Write (string.Format ("Started loading door texture mappings..."));
-      JSONNode jsonTextureMapping;
-      Pipliz.JSON.JSON.Deserialize (Path.Combine (DoorsDirectory, "doorstexturemapping.json"), out jsonTextureMapping, true);
-      if (jsonTextureMapping.NodeType == NodeType.Object) {
-        foreach (KeyValuePair<string,JSONNode> textureEntry in jsonTextureMapping.LoopObject()) {
-          try {
-            foreach (string suffix in new string[] { "", OPEN_SUFFIX }) {
-              JSONNode mapping = new JSONNode ();
-              foreach (string textureType in new string[] { "albedo", "normal", "emissive", "height" }) {
-                string textureTypeValue = textureEntry.Value.GetAs<string> (textureType);
-                string realTextureTypeValue = textureTypeValue;
-                if (!textureTypeValue.Equals ("neutral")) {
-                  realTextureTypeValue = MultiPath.Combine (relativeTexturesPath, textureType, textureTypeValue);
-                  Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
-                }
-                mapping.SetAs (textureType, realTextureTypeValue);
-              }
-              string realkey = MOD_PREFIX + textureEntry.Key + suffix;
-              Pipliz.Log.Write (string.Format ("Adding texture mapping for '{0}'", realkey));
-              ItemTypesServer.AddTextureMapping (realkey, mapping);
-            }
-          } catch (Exception exception) {
-            Pipliz.Log.WriteError (string.Format ("Exception while loading from {0}; {1}", "doorstexturemapping.json", exception.Message));
-          }
-        }
-      }
-      string relativeAssetsTexturesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (AssetsDirectory, "textures"))).OriginalString;
-      ItemTypesServer.AddTextureMapping (MOD_PREFIX + "doorram", new JSONNode ()
-        .SetAs ("albedo", MultiPath.Combine (relativeAssetsTexturesPath, "albedo", "doorram"))
-        .SetAs ("normal", "neutral")
-        .SetAs ("emissive", "neutral")
-        .SetAs ("height", "neutral")
-      );
-      ItemTypes.AddRawType (MOD_PREFIX + "doorram", new JSONNode ()
-        .SetAs ("isRotatable", true)
-        .SetAs ("needsBase", true)
-        .SetAs ("sideall", "SELF")
-        .SetAs ("icon", Path.Combine (RelativeIconsPath, "doorram.png"))
-        .SetAs ("rotatablex+", MOD_PREFIX + "doorramx+")
-        .SetAs ("rotatablex-", MOD_PREFIX + "doorramx-")
-        .SetAs ("rotatablez+", MOD_PREFIX + "doorramz+")
-        .SetAs ("rotatablez-", MOD_PREFIX + "doorramz-")
-      );
-      string relativeAssetsMeshesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "meshes", "dummyfile")).MakeRelativeUri (new Uri (Path.Combine (AssetsDirectory, "meshes"))).OriginalString;
-      foreach (string xz in new string[] { "x+", "x-", "z+", "z-" }) {
-        ItemTypes.AddRawType (MOD_PREFIX + "doorram" + xz, new JSONNode ()
-                             .SetAs ("parentType", MOD_PREFIX + "doorram")
-                             .SetAs ("mesh", Path.Combine (relativeAssetsMeshesPath, "doorram" + xz + ".obj"))
-        );
-      }
       Pipliz.Log.Write (string.Format ("Started loading door types..."));
       JSONNode jsonTypes;
-      Pipliz.JSON.JSON.Deserialize (Path.Combine (DoorsDirectory, "doorstypes.json"), out jsonTypes, true);
+      JSON.Deserialize (Path.Combine (DoorsDirectory, "doorstypes.json"), out jsonTypes, true);
       if (jsonTypes.NodeType == NodeType.Object) {
         foreach (KeyValuePair<string,JSONNode> typeEntry in jsonTypes.LoopObject()) {
           try {
@@ -110,13 +52,13 @@ namespace ScarabolMods
               JSONNode jsonType = new JSONNode ();
               string icon;
               if (typeEntry.Value.TryGetAs ("icon", out icon) && suffix.Length < 1) {
-                string realicon = Path.Combine (RelativeDoorsIconsPath, icon);
+                string realicon = MultiPath.Combine (DoorsDirectory, "icons", icon);
                 Pipliz.Log.Write (string.Format ("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                 jsonType.SetAs ("icon", realicon);
               }
               string mesh;
               if (typeEntry.Value.TryGetAs ("mesh" + suffix, out mesh)) {
-                string realmesh = Path.Combine (relativeMeshesPath, mesh);
+                string realmesh = MultiPath.Combine (DoorsDirectory, "meshes", mesh);
                 Pipliz.Log.Write (string.Format ("Rewriting mesh path from '{0}' to '{1}'", mesh, realmesh));
                 jsonType.SetAs ("mesh", realmesh);
               }
@@ -126,13 +68,45 @@ namespace ScarabolMods
                 Pipliz.Log.Write (string.Format ("Rewriting parentType from '{0}' to '{1}'", parentType, realParentType));
                 jsonType.SetAs ("parentType", realParentType);
               }
+              JSONNode onRemove;
+              if (typeEntry.Value.TryGetAs<JSONNode> ("onRemove", out onRemove)) {
+                JSONNode jsonOnRemove = new JSONNode ();
+                foreach (JSONNode onRemovePart in onRemove.LoopArray()) {
+                  string removeType;
+                  if (onRemovePart.TryGetAs ("type", out removeType)) {
+                    string realOnRemove = MOD_PREFIX + removeType;
+                    Pipliz.Log.Write (string.Format ("Rewriting onRemove type from '{0}' to '{1}'", removeType, realOnRemove));
+                    jsonOnRemove.SetAs ("type", realOnRemove);
+                    jsonOnRemove.SetAs ("amount", 1);
+                    jsonOnRemove.SetAs ("chance", 1);
+                  }
+                }
+                JSONNode jsonOnRemoveGroup = new JSONNode (NodeType.Array);
+                jsonOnRemoveGroup.AddToArray (jsonOnRemove);
+                jsonType.SetAs ("onRemove", jsonOnRemoveGroup);
+              } else if (suffix.Length > 0) {
+                string plainKey = MOD_PREFIX + typeEntry.Key;
+                if (typeEntry.Key.EndsWith ("x+") || typeEntry.Key.EndsWith ("x-") || typeEntry.Key.EndsWith ("z+") || typeEntry.Key.EndsWith ("z-")) {
+                  plainKey = plainKey.Substring (0, plainKey.Length - 2);
+                }
+                ItemTypesServer.ItemTypeRaw removeType;
+                if (itemTypes.TryGetValue (plainKey, out removeType)) {
+                  plainKey = ItemTypes.IndexLookup.GetName (removeType.OnRemoveItems [0].item.Type);
+                }
+                JSONNode jsonOnRemove = new JSONNode ();
+                jsonOnRemove.SetAs ("type", plainKey);
+                jsonOnRemove.SetAs ("amount", 1);
+                jsonOnRemove.SetAs ("chance", 1);
+                JSONNode jsonOnRemoveGroup = new JSONNode (NodeType.Array);
+                jsonOnRemoveGroup.AddToArray (jsonOnRemove);
+                jsonType.SetAs ("onRemove", jsonOnRemoveGroup);
+                Pipliz.Log.Write (string.Format ("Setting onRemove type for '{0}' to '{1}'", typeEntry.Key + suffix, plainKey));
+              }
               string realkey;
               if (!(typeEntry.Key.EndsWith ("x+") || typeEntry.Key.EndsWith ("x-") || typeEntry.Key.EndsWith ("z+") || typeEntry.Key.EndsWith ("z-"))) {
                 jsonType
                   .SetAs ("isSolid", suffix.Length < 1)
                   .SetAs ("needsBase", false)
-                  .SetAs ("destructionTime", 200)
-                  .SetAs ("onRemove", new JSONNode (NodeType.Array))
                   .SetAs ("isRotatable", true)
                   .SetAs ("sideall", "SELF")
                   .SetAs ("npcLimit", 0);
@@ -166,13 +140,15 @@ namespace ScarabolMods
                 realkey = MOD_PREFIX + typeEntry.Key + suffix;
                 Pipliz.Log.Write (string.Format ("Adding door base type '{0}'", realkey));
                 if (suffix.Length < 1) {
-                  doorTypeKeys.Add (MOD_PREFIX + typeEntry.Key);
+                  doorClosedTypeKeys.Add (realkey);
+                } else {
+                  doorOpenTypeKeys.Add (realkey);
                 }
               } else {
                 realkey = MOD_PREFIX + typeEntry.Key.Substring (0, typeEntry.Key.Length - 2) + suffix + typeEntry.Key.Substring (typeEntry.Key.Length - 2);
                 Pipliz.Log.Write (string.Format ("Adding door rotatable type '{0}'", realkey));
               }
-              ItemTypes.AddRawType (realkey, jsonType);
+              itemTypes.Add (realkey, new ItemTypesServer.ItemTypeRaw (realkey, jsonType));
             }
           } catch (Exception exception) {
             Pipliz.Log.WriteError (string.Format ("Exception while loading door type {0}; {1}", typeEntry.Key, exception.Message));
@@ -183,14 +159,59 @@ namespace ScarabolMods
       }
     }
 
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterSelectedWorld, "scarabol.doors.registertexturemappings")]
+    [ModLoader.ModCallbackProvidesFor ("pipliz.server.registertexturemappingtextures")]
+    public static void AfterSelectedWorld ()
+    {
+      Pipliz.Log.Write (string.Format ("Started loading door texture mappings..."));
+      JSONNode jsonTextureMapping;
+      JSON.Deserialize (Path.Combine (DoorsDirectory, "doorstexturemapping.json"), out jsonTextureMapping, true);
+      if (jsonTextureMapping.NodeType == NodeType.Object) {
+        foreach (KeyValuePair<string,JSONNode> textureEntry in jsonTextureMapping.LoopObject()) {
+          try {
+            foreach (string suffix in new string[] { "", OPEN_SUFFIX }) {
+              ItemTypesServer.TextureMapping textureMapping = new ItemTypesServer.TextureMapping (new JSONNode ());
+              string textureTypeValue;
+              if (textureEntry.Value.TryGetAs<string> ("albedo", out textureTypeValue) && !textureTypeValue.Equals ("neutral")) {
+                string realTextureTypeValue = MultiPath.Combine (DoorsDirectory, "textures", "albedo", textureTypeValue + ".png");
+                Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", "albedo", textureTypeValue, realTextureTypeValue));
+                textureMapping.AlbedoPath = realTextureTypeValue;
+              }
+              if (textureEntry.Value.TryGetAs<string> ("normal", out textureTypeValue) && !textureTypeValue.Equals ("neutral")) {
+                string realTextureTypeValue = MultiPath.Combine (DoorsDirectory, "textures", "normal", textureTypeValue + ".png");
+                Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", "normal", textureTypeValue, realTextureTypeValue));
+                textureMapping.NormalPath = realTextureTypeValue;
+              }
+              if (textureEntry.Value.TryGetAs<string> ("emissive", out textureTypeValue) && !textureTypeValue.Equals ("neutral")) {
+                string realTextureTypeValue = MultiPath.Combine (DoorsDirectory, "textures", "emissive", textureTypeValue + ".png");
+                Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", "emissive", textureTypeValue, realTextureTypeValue));
+                textureMapping.EmissivePath = realTextureTypeValue;
+              }
+              if (textureEntry.Value.TryGetAs<string> ("height", out textureTypeValue) && !textureTypeValue.Equals ("neutral")) {
+                string realTextureTypeValue = MultiPath.Combine (DoorsDirectory, "textures", "height", textureTypeValue + ".png");
+                Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", "height", textureTypeValue, realTextureTypeValue));
+                textureMapping.HeightPath = realTextureTypeValue;
+              }
+              string realkey = MOD_PREFIX + textureEntry.Key + suffix;
+              Pipliz.Log.Write (string.Format ("Adding texture mapping for '{0}'", realkey));
+              ItemTypesServer.SetTextureMapping (realkey, textureMapping);
+            }
+          } catch (Exception exception) {
+            Pipliz.Log.WriteError (string.Format ("Exception while loading from {0}; {1}", "doorstexturemapping.json", exception.Message));
+          }
+        }
+      }
+    }
+
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterItemTypesDefined, "scarabol.doors.loadrecipes")]
-    [ModLoader.ModCallbackProvidesFor ("pipliz.apiprovider.registerrecipes")]
-    public static void AfterItemTypesDefined ()
+    [ModLoader.ModCallbackDependsOn ("pipliz.server.loadresearchables")]
+    [ModLoader.ModCallbackProvidesFor ("pipliz.server.loadsortorder")]
+    public static void LoadRecipes ()
     {
       try {
         Pipliz.Log.Write (string.Format ("Started loading door recipes..."));
         JSONNode jsonCrafting;
-        Pipliz.JSON.JSON.Deserialize (Path.Combine (DoorsDirectory, "doorscrafting.json"), out jsonCrafting, true);
+        JSON.Deserialize (Path.Combine (DoorsDirectory, "doorscrafting.json"), out jsonCrafting, true);
         if (jsonCrafting.NodeType == NodeType.Array) {
           foreach (JSONNode craftingEntry in jsonCrafting.LoopArray()) {
             JSONNode jsonResults = craftingEntry.GetAs<JSONNode> ("results");
@@ -200,7 +221,7 @@ namespace ScarabolMods
               Pipliz.Log.Write (string.Format ("Replacing door recipe result type '{0}' with '{1}'", type, realtype));
               jsonResult.SetAs ("type", realtype);
             }
-            doorRecipes.Add (new Recipe (craftingEntry));
+            RecipePlayer.AddDefaultRecipe (new Recipe (craftingEntry));
           }
         } else {
           Pipliz.Log.WriteError (string.Format ("Expected json array in {0}, but got {1} instead", "doorscrafting.json", jsonCrafting.NodeType));
@@ -210,143 +231,118 @@ namespace ScarabolMods
       }
     }
 
-    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterItemTypesServer, "scarabol.doors.registertypes")]
-    public static void AfterItemTypesServer ()
-    {
-      ItemTypesServer.RegisterOnAdd (MOD_PREFIX + "doorram", RamBlockCode.OnAddRam);
-      foreach (string typekey in doorTypeKeys) {
-        if (!typekey.EndsWith ("top")) {
-          ItemTypesServer.RegisterOnAdd (typekey, DoorBlockCode.OnAddDoor);
-        }
-        ItemTypesServer.RegisterOnRemove (typekey, DoorBlockCode.OnOpenAction);
-        ItemTypesServer.RegisterOnRemove (typekey + OPEN_SUFFIX, DoorBlockCode.OnCloseAction);
-      }
-    }
-
-    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.doors.addplayercrafts")]
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.doors.afterworldload")]
     public static void AfterWorldLoad ()
     {
-      // add recipes here, otherwise they're inserted before vanilla recipes in player crafts
-      RecipePlayer.AllRecipes.Add (new Recipe (new List<InventoryItem> () {
-        new InventoryItem ("planks", 1),
-        new InventoryItem ("stonebricks", 2)
-      }, new InventoryItem (MOD_PREFIX + "doorram", 1)));
-      RecipePlayer.AllRecipes.AddRange (doorRecipes);
+      foreach (string xz in new string[] { "x+", "x-", "z+", "z-" }) {
+        foreach (string typekey in doorClosedTypeKeys) {
+          allDoorTypes.Add (ItemTypes.IndexLookup.GetIndex (typekey + xz));
+        }
+        foreach (string typekey in doorOpenTypeKeys) {
+          allDoorTypes.Add (ItemTypes.IndexLookup.GetIndex (typekey + xz));
+        }
+      }
     }
-  }
 
-  public static class RamBlockCode
-  {
-    public static void OnAddRam (Vector3Int position, ushort wasType, Players.Player causedBy)
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.OnTryChangeBlockUser, "scarabol.doors.trychangeblock")]
+    public static bool OnTryChangeBlockUser (ModLoader.OnTryChangeBlockUserData userData)
     {
-      try {
-        Chat.Send (causedBy, string.Format ("You placed a doorram. This door will be gone in 5 seconds...", position));
-        ThreadManager.InvokeOnMainThread (delegate () {
-          string dir = ItemTypes.IndexLookup.GetName (wasType);
-          string xz = dir.Substring (dir.Length - 2);
-          ushort realType;
-          if (World.TryGetTypeAt (position, out realType) && realType == ItemTypes.IndexLookup.GetIndex (DoorsModEntries.MOD_PREFIX + "doorram" + xz)) {
-            Chat.Send (causedBy, string.Format ("BAM!!!", position));
-            int ox = 0, oz = 0;
-            if (xz.Equals ("x+")) {
-              ox = 1;
-            } else if (xz.Equals ("x-")) {
-              ox = -1;
-            } else if (xz.Equals ("z-")) {
-              oz = -1;
-            } else {
-              oz = 1;
-            }
-            ServerManager.TryChangeBlock (position, BlockTypes.Builtin.BuiltinBlocks.Air);
-            ServerManager.TryChangeBlock (position.Add (ox, 0, oz), BlockTypes.Builtin.BuiltinBlocks.Air);
-            ServerManager.TryChangeBlock (position.Add (ox, 1, oz), BlockTypes.Builtin.BuiltinBlocks.Air);
-          }
-        }, 5.0);
-      } catch (Exception exception) {
-        Pipliz.Log.WriteError (string.Format ("Exception in OnAddRam; {0}", exception.Message));
+      Players.Player requestedBy = userData.requestedBy;
+      Vector3Int position = userData.VoxelToChange;
+      if (userData.isPrimaryAction) {
+        if (allDoorTypes.Contains (userData.typeTillNow)) {
+          return DoorBlockTracker.RemoveDoor (position, requestedBy);
+        }
+      } else {
+        if (allDoorTypes.Contains (userData.typeToBuild)) {
+          return DoorBlockTracker.AddDoor (position, userData.typeToBuild, requestedBy);
+        }
+      }
+      return true;
+    }
+
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.OnPlayerClicked, "scarabol.doors.onplayerclicked")]
+    public static void OnPlayerClicked (Players.Player player, Pipliz.Box<Shared.PlayerClickedData> boxedData)
+    {
+      var clickedData = boxedData.item1;
+      if (clickedData.clickType == Shared.PlayerClickedData.ClickType.Left) {
+        if (clickedData.rayCastHit.rayHitType == Shared.RayHitType.Block) {
+          Vector3Int voxelHit = clickedData.rayCastHit.voxelHit;
+          DoorBlockTracker.ToggleDoor (voxelHit, player);
+        }
       }
     }
   }
 
-  public static class DoorBlockCode
+  public static class DoorBlockTracker
   {
-    public static void OnOpenAction (Vector3Int position, ushort wasType, Players.Player causedBy)
+    private static Dictionary<Vector3Int, Vector3Int> doorParts = new Dictionary<Vector3Int, Vector3Int> ();
+
+    public static bool AddDoor (Vector3Int position, ushort type, Players.Player causedBy)
     {
-      try {
-        if (causedBy != null) {
-          string wasTypeName = ItemTypes.IndexLookup.GetName (wasType); // e.g. mods.scarabol.doors.woodendoorz+
-          string xz = wasTypeName.Substring (wasTypeName.Length - 2); // e.g. z+
-          string doorBaseName = wasTypeName.Substring (0, wasTypeName.Length - 2); // e.g. mods.scarabol.doors.woodendoor
-          string newTypeName = doorBaseName + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoor.openz+
-          ServerManager.TryChangeBlock (position, ItemTypes.IndexLookup.GetIndex (newTypeName));
-          Vector3Int otherPos = position.Add (0, 1, 0);
-          string otherName = doorBaseName + "top" + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoortop.openz+
-          string otherWasTypeName = doorBaseName + "top" + xz; // e.g. mods.scarabol.doors.woodendoortopz+
-          if (doorBaseName.EndsWith ("top")) {
-            otherPos = position.Add (0, -1, 0);
-            otherName = doorBaseName.Substring (0, doorBaseName.Length - "top".Length) + DoorsModEntries.OPEN_SUFFIX + xz; // e.g. mods.scarabol.doors.woodendoor.openz+
-            otherWasTypeName = doorBaseName.Substring (0, doorBaseName.Length - "top".Length) + xz; // e.g. mods.scarabol.doors.woodendoortopz+
-          }
-          ushort actualOtherWasType;
-          if (World.TryGetTypeAt (otherPos, out actualOtherWasType) && actualOtherWasType == ItemTypes.IndexLookup.GetIndex (otherWasTypeName)) {
-            ServerManager.TryChangeBlock (otherPos, ItemTypes.IndexLookup.GetIndex (otherName));
-          }
-        } else {
-          Pipliz.Log.Write (string.Format ("OnOpenAction called by nobody"));
+      string typename = ItemTypes.IndexLookup.GetName (type);
+      ushort upperType;
+      ushort actualType;
+      string topname = typename.Substring (0, typename.Length - 2) + "top" + typename.Substring (typename.Length - 2);
+      if (ItemTypes.IndexLookup.TryGetIndex (topname, out upperType)) {
+        Vector3Int upperPos = position.Add (0, 1, 0);
+        if (World.TryGetTypeAt (upperPos, out actualType) && actualType != BuiltinBlocks.Air) {
+          return false;
         }
-      } catch (Exception exception) {
-        Pipliz.Log.WriteError (string.Format ("Exception in OnOpenAction; {0}", exception.Message));
+        if (ServerManager.TryChangeBlock (upperPos, upperType)) {
+          doorParts.Add (position, upperPos);
+          doorParts.Add (upperPos, position);
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        doorParts.Add (position, Vector3Int.invalidPos);
+        return true;
       }
     }
 
-    public static void OnCloseAction (Vector3Int position, ushort wasType, Players.Player causedBy)
+    public static bool RemoveDoor (Vector3Int position, Players.Player causedBy)
     {
-      try {
-        Players.Player closest;
-        if ((Players.TryFindClosest (position.Vector, out closest) && Pipliz.Math.ManhattanDistance (position, new Vector3Int (closest.Position)) < 2) ||
-            (Players.TryFindClosest (position.Add (0, 1, 0).Vector, out closest) && Pipliz.Math.ManhattanDistance (position.Add (0, 1, 0), new Vector3Int (closest.Position)) < 2)) {
-          ServerManager.TryChangeBlock (position, wasType);
-          return;
+      Vector3Int otherPos;
+      if (doorParts.TryGetValue (position, out otherPos) && otherPos != Vector3Int.invalidPos) {
+        if (!ServerManager.TryChangeBlock (otherPos, BuiltinBlocks.Air)) {
+          return false;
         }
-        if (causedBy != null) {
-          string wasTypeName = ItemTypes.IndexLookup.GetName (wasType); // e.g. mods.scarabol.doors.woodendoor.openz+
-          string wasTypeBaseName = wasTypeName.Substring (0, wasTypeName.Length - 2);
-          string xz = wasTypeName.Substring (wasTypeName.Length - 2);
-          string doorBaseName = wasTypeBaseName.Substring (0, wasTypeBaseName.Length - DoorsModEntries.OPEN_SUFFIX.Length);
-          string newTypeName = doorBaseName + xz;
-          ServerManager.TryChangeBlock (position, ItemTypes.IndexLookup.GetIndex (newTypeName));
-          Vector3Int otherPos = position.Add (0, 1, 0);
-          string otherName = doorBaseName + "top" + xz;
-          string otherWasTypeName = doorBaseName + "top" + DoorsModEntries.OPEN_SUFFIX + xz;
-          if (doorBaseName.EndsWith ("top")) {
-            otherPos = position.Add (0, -1, 0);
-            otherName = doorBaseName.Substring (0, doorBaseName.Length - "top".Length) + xz;
-            otherWasTypeName = doorBaseName.Substring (0, doorBaseName.Length - "top".Length) + DoorsModEntries.OPEN_SUFFIX + xz;
-          }
-          ushort actualOtherWasType;
-          if (World.TryGetTypeAt (otherPos, out actualOtherWasType) && actualOtherWasType == ItemTypes.IndexLookup.GetIndex (otherWasTypeName)) {
-            ServerManager.TryChangeBlock (otherPos, ItemTypes.IndexLookup.GetIndex (otherName));
-          }
-        } else {
-          Pipliz.Log.Write (string.Format ("OnCloseAction called by nobody"));
+        doorParts.Remove (otherPos);
+      }
+      doorParts.Remove (position);
+      return true;
+    }
+
+    public static void ToggleDoor (Vector3Int position, Players.Player causedBy)
+    {
+      Vector3Int otherPos;
+      if (doorParts.TryGetValue (position, out otherPos)) {
+        ToggleDoorBlock (position, causedBy);
+        if (otherPos != Vector3Int.invalidPos) {
+          ToggleDoorBlock (otherPos, causedBy);
         }
-      } catch (Exception exception) {
-        Pipliz.Log.WriteError (string.Format ("Exception in OnCloseAction; {0}", exception.Message));
       }
     }
 
-    public static void OnAddDoor (Vector3Int position, ushort doorType, Players.Player causedBy)
+    private static void ToggleDoorBlock (Vector3Int position, Players.Player causedBy)
     {
-      try {
-        if (causedBy != null) {
-          string doorTypeName = ItemTypes.IndexLookup.GetName (doorType);
-          string aboveTypeName = doorTypeName.Substring (0, doorTypeName.Length - 2) + "top" + doorTypeName.Substring (doorTypeName.Length - 2);
-          ServerManager.TryChangeBlock (position.Add (0, 1, 0), ItemTypes.IndexLookup.GetIndex (aboveTypeName));
+      ushort actualType;
+      if (World.TryGetTypeAt (position, out actualType)) {
+        string typename = ItemTypes.IndexLookup.GetName (actualType);
+        string baseTypename = typename.Substring (0, typename.Length - 2);
+        string xz = typename.Substring (typename.Length - 2);
+        string otherTypename;
+        if (baseTypename.EndsWith (DoorsModEntries.OPEN_SUFFIX)) {
+          otherTypename = baseTypename.Substring (0, baseTypename.Length - DoorsModEntries.OPEN_SUFFIX.Length) + xz;
         } else {
-          Pipliz.Log.Write (string.Format ("Door placed by nobody"));
+          otherTypename = baseTypename + DoorsModEntries.OPEN_SUFFIX + xz;
         }
-      } catch (Exception exception) {
-        Pipliz.Log.WriteError (string.Format ("Exception in OnAddDoor; {0}", exception.Message));
+        ushort otherType;
+        if (ItemTypes.IndexLookup.TryGetIndex (otherTypename, out otherType)) {
+          ServerManager.TryChangeBlock (position, otherType);
+        }
       }
     }
   }

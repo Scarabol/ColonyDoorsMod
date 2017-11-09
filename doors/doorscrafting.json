@@ -1,13 +1,16 @@
 [
   {
+    "name":"woodendoor.recipe",
     "results":[{"type":"woodendoor"}],
     "requires":[{"type":"planks","amount":2}]
   },
   {
+    "name":"woodendoor2.recipe",
     "results":[{"type":"woodendoor2"}],
     "requires":[{"type":"planks","amount":2}]
   },
   {
+    "name":"woodgate.recipe",
     "results":[{"type":"woodgate"}],
     "requires":[{"type":"planks","amount":3}]
   }

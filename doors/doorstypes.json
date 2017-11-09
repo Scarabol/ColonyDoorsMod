@@ -34,7 +34,8 @@
     "rotatablex+" : "woodendoortopx+",
     "rotatablex-" : "woodendoortopx-",
     "rotatablez+" : "woodendoortopz+",
-    "rotatablez-" : "woodendoortopz-"
+    "rotatablez-" : "woodendoortopz-",
+    "onRemove" : [ { "type" : "woodendoor" } ]
   },
   "woodendoortopx+" : {
     "parentType" : "woodendoortop",
@@ -91,7 +92,8 @@
     "rotatablex+" : "woodendoor2topx+",
     "rotatablex-" : "woodendoor2topx-",
     "rotatablez+" : "woodendoor2topz+",
-    "rotatablez-" : "woodendoor2topz-"
+    "rotatablez-" : "woodendoor2topz-",
+    "onRemove" : [ { "type" : "woodendoor2" } ]
   },
   "woodendoor2topx+" : {
     "parentType" : "woodendoor2top",
