@@ -26,13 +26,12 @@ namespace ScarabolMods
     {
       ModDirectory = Path.GetDirectoryName (path);
       DoorsDirectory = Path.Combine (ModDirectory, "doors");
-      ModLocalizationHelper.localize (Path.Combine (DoorsDirectory, "localization"), MOD_PREFIX);
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterStartup, "scarabol.doors.registercallbacks")]
     public static void AfterStartup ()
     {
-      Pipliz.Log.Write ("Loaded Doors Mod 2.0 by Scarabol");
+      Pipliz.Log.Write ("Loaded Doors Mod 3.0.0 by Scarabol");
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.doors.addrawtypes")]
@@ -228,8 +227,11 @@ namespace ScarabolMods
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.doors.afterworldload")]
+    [ModLoader.ModCallbackDependsOn ("pipliz.server.localization.waitforloading")]
+    [ModLoader.ModCallbackProvidesFor ("pipliz.server.localization.convert")]
     public static void AfterWorldLoad ()
     {
+      ModLocalizationHelper.localize (Path.Combine (DoorsDirectory, "localization"), MOD_PREFIX);
       foreach (string xz in new string[] { "x+", "x-", "z+", "z-" }) {
         foreach (string typekey in doorClosedTypeKeys) {
           allDoorTypes.Add (ItemTypes.IndexLookup.GetIndex (typekey + xz));

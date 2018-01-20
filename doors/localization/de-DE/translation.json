@@ -1,0 +1,7 @@
+{
+  "types" : {
+    "woodgate" : "Holztor",
+    "woodendoor" : "Holztür (links)",
+    "woodendoor2" : "Holztür (rechts)"
+  }
+}
