@@ -5,7 +5,6 @@ using Pipliz;
 using Pipliz.Chatting;
 using Pipliz.JSON;
 using Pipliz.Threading;
-using Pipliz.APIProvider.Jobs;
 using NPC;
 using BlockTypes.Builtin;
 
@@ -17,7 +16,6 @@ namespace ScarabolMods
     public static string MOD_PREFIX = "mods.scarabol.doors.";
     public static string OPEN_SUFFIX = ".open";
     public static string ModDirectory;
-    private static string AssetsDirectory;
     private static string DoorsDirectory;
     private static List<string> doorClosedTypeKeys = new List<string> ();
     private static List<string> doorOpenTypeKeys = new List<string> ();
@@ -27,8 +25,6 @@ namespace ScarabolMods
     public static void OnAssemblyLoaded (string path)
     {
       ModDirectory = Path.GetDirectoryName (path);
-      AssetsDirectory = Path.Combine (ModDirectory, "assets");
-      ModLocalizationHelper.localize (Path.Combine (AssetsDirectory, "localization"), "mods.scarabol.assets.");
       DoorsDirectory = Path.Combine (ModDirectory, "doors");
       ModLocalizationHelper.localize (Path.Combine (DoorsDirectory, "localization"), MOD_PREFIX);
     }
