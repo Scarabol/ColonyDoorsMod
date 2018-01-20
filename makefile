@@ -1,7 +1,7 @@
 # important variables
 modname = Doors
 versionmajor = 3.0
-versionminor = 0
+versionminor = 1
 compatible_cs = "0.5.0", "0.5.1", "0.5.2"
 zip_files_extra = ""
 
