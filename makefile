@@ -3,12 +3,13 @@ modname = Doors
 versionmajor = 3.0
 versionminor = 1
 compatible_cs = "0.5.0", "0.5.1", "0.5.2"
-zip_files_extra = ""
 
 fullname = Colony$(modname)Mod
 moddir = Scarabol/$(modname)
 zipname = $(fullname)-$(version)-mods.zip
 dllname = $(modname).dll
+
+zip_files_extra = "$(moddir)/doors/"
 
 define MODINFO_JSON
 [
@@ -45,9 +46,11 @@ all: clean default
 modinfo:
 	echo "$$MODINFO_JSON" > "modInfo.json"
 
-release: default modinfo
+zip:
 	rm -f "$(zipname)"
 	cd ../../ && zip -r "$(moddir)/$(zipname)" "$(moddir)/modInfo.json" "$(moddir)/$(dllname)" $(zip_files_extra)
+
+release: default modinfo zip
 	git push
 	git tag "$(version)" && git push --tags
 	make publish
