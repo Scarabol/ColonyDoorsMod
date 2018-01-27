@@ -1,7 +1,7 @@
 # important variables
 modname = Doors
 versionmajor = 5.3
-versionminor = 0
+versionminor = 1
 compatible_cs = "0.5.3"
 
 fullname = Colony$(modname)Mod
