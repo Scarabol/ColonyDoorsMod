@@ -39,118 +39,121 @@ namespace ScarabolMods
     {
       Pipliz.Log.Write (string.Format ("Started loading door types..."));
       JSONNode jsonTypes;
-      JSON.Deserialize (Path.Combine (DoorsDirectory, "doorstypes.json"), out jsonTypes, true);
-      if (jsonTypes.NodeType == NodeType.Object) {
-        foreach (KeyValuePair<string,JSONNode> typeEntry in jsonTypes.LoopObject()) {
-          try {
-            foreach (string suffix in new string[] { "", OPEN_SUFFIX }) {
-              JSONNode jsonType = new JSONNode ();
-              string icon;
-              if (typeEntry.Value.TryGetAs ("icon", out icon) && suffix.Length < 1) {
-                string realicon = MultiPath.Combine (DoorsDirectory, "icons", icon);
-                Pipliz.Log.Write (string.Format ("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
-                jsonType.SetAs ("icon", realicon);
-              }
-              string mesh;
-              if (typeEntry.Value.TryGetAs ("mesh" + suffix, out mesh)) {
-                string realmesh = MultiPath.Combine (DoorsDirectory, "meshes", mesh);
-                Pipliz.Log.Write (string.Format ("Rewriting mesh path from '{0}' to '{1}'", mesh, realmesh));
-                jsonType.SetAs ("mesh", realmesh);
-              }
-              string parentType;
-              if (typeEntry.Value.TryGetAs ("parentType", out parentType)) {
-                string realParentType = MOD_PREFIX + parentType + suffix;
-                Pipliz.Log.Write (string.Format ("Rewriting parentType from '{0}' to '{1}'", parentType, realParentType));
-                jsonType.SetAs ("parentType", realParentType);
-              }
-              JSONNode onRemove;
-              if (typeEntry.Value.TryGetAs<JSONNode> ("onRemove", out onRemove)) {
-                JSONNode jsonOnRemove = new JSONNode ();
-                foreach (JSONNode onRemovePart in onRemove.LoopArray()) {
-                  string removeType;
-                  if (onRemovePart.TryGetAs ("type", out removeType)) {
-                    string realOnRemove = MOD_PREFIX + removeType;
-                    Pipliz.Log.Write (string.Format ("Rewriting onRemove type from '{0}' to '{1}'", removeType, realOnRemove));
-                    jsonOnRemove.SetAs ("type", realOnRemove);
-                    jsonOnRemove.SetAs ("amount", 1);
-                    jsonOnRemove.SetAs ("chance", 1);
-                  }
+      if (!JSON.Deserialize (Path.Combine (DoorsDirectory, "doorstypes.json"), out jsonTypes, false)) {
+        Pipliz.Log.Write ("No door types file found, so no doors loaded");
+        return;
+      }
+      if (jsonTypes.NodeType != NodeType.Object) {
+        Pipliz.Log.WriteError (string.Format ("Expected json object in {0}, but got {1} instead", "doorstypes.json", jsonTypes.NodeType));
+        return;
+      }
+      foreach (KeyValuePair<string,JSONNode> typeEntry in jsonTypes.LoopObject()) {
+        try {
+          foreach (string suffix in new string[] { "", OPEN_SUFFIX }) {
+            JSONNode jsonType = new JSONNode ();
+            string icon;
+            if (typeEntry.Value.TryGetAs ("icon", out icon) && suffix.Length < 1) {
+              string realicon = MultiPath.Combine (DoorsDirectory, "icons", icon);
+              Pipliz.Log.Write (string.Format ("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
+              jsonType.SetAs ("icon", realicon);
+            }
+            string mesh;
+            if (typeEntry.Value.TryGetAs ("mesh" + suffix, out mesh)) {
+              string realmesh = MultiPath.Combine (DoorsDirectory, "meshes", mesh);
+              Pipliz.Log.Write (string.Format ("Rewriting mesh path from '{0}' to '{1}'", mesh, realmesh));
+              jsonType.SetAs ("mesh", realmesh);
+            }
+            string parentType;
+            if (typeEntry.Value.TryGetAs ("parentType", out parentType)) {
+              string realParentType = MOD_PREFIX + parentType + suffix;
+              Pipliz.Log.Write (string.Format ("Rewriting parentType from '{0}' to '{1}'", parentType, realParentType));
+              jsonType.SetAs ("parentType", realParentType);
+            }
+            JSONNode onRemove;
+            if (typeEntry.Value.TryGetAs<JSONNode> ("onRemove", out onRemove)) {
+              JSONNode jsonOnRemove = new JSONNode ();
+              foreach (JSONNode onRemovePart in onRemove.LoopArray()) {
+                string removeType;
+                if (onRemovePart.TryGetAs ("type", out removeType)) {
+                  string realOnRemove = MOD_PREFIX + removeType;
+                  Pipliz.Log.Write (string.Format ("Rewriting onRemove type from '{0}' to '{1}'", removeType, realOnRemove));
+                  jsonOnRemove.SetAs ("type", realOnRemove);
+                  jsonOnRemove.SetAs ("amount", 1);
+                  jsonOnRemove.SetAs ("chance", 1);
                 }
-                JSONNode jsonOnRemoveGroup = new JSONNode (NodeType.Array);
-                jsonOnRemoveGroup.AddToArray (jsonOnRemove);
-                jsonType.SetAs ("onRemove", jsonOnRemoveGroup);
-              } else if (suffix.Length > 0) {
-                string plainKey = MOD_PREFIX + typeEntry.Key;
-                if (typeEntry.Key.EndsWith ("x+") || typeEntry.Key.EndsWith ("x-") || typeEntry.Key.EndsWith ("z+") || typeEntry.Key.EndsWith ("z-")) {
-                  plainKey = plainKey.Substring (0, plainKey.Length - 2);
-                }
-                ItemTypesServer.ItemTypeRaw removeType;
-                if (itemTypes.TryGetValue (plainKey, out removeType)) {
-                  plainKey = ItemTypes.IndexLookup.GetName (removeType.OnRemoveItems [0].item.Type);
-                }
-                JSONNode jsonOnRemove = new JSONNode ();
-                jsonOnRemove.SetAs ("type", plainKey);
-                jsonOnRemove.SetAs ("amount", 1);
-                jsonOnRemove.SetAs ("chance", 1);
-                JSONNode jsonOnRemoveGroup = new JSONNode (NodeType.Array);
-                jsonOnRemoveGroup.AddToArray (jsonOnRemove);
-                jsonType.SetAs ("onRemove", jsonOnRemoveGroup);
-                Pipliz.Log.Write (string.Format ("Setting onRemove type for '{0}' to '{1}'", typeEntry.Key + suffix, plainKey));
               }
-              string realkey;
-              if (!(typeEntry.Key.EndsWith ("x+") || typeEntry.Key.EndsWith ("x-") || typeEntry.Key.EndsWith ("z+") || typeEntry.Key.EndsWith ("z-"))) {
-                jsonType
-                  .SetAs ("isSolid", suffix.Length < 1)
-                  .SetAs ("needsBase", false)
-                  .SetAs ("isRotatable", true)
-                  .SetAs ("sideall", "SELF")
-                  .SetAs ("npcLimit", 0);
-                foreach (string rotatable in new string[] { "rotatablex+", "rotatablex-", "rotatablez+", "rotatablez-" }) {
-                  string key;
-                  if (typeEntry.Value.TryGetAs (rotatable, out key)) {
-                    string rotatablekey = MOD_PREFIX + key.Substring (0, key.Length - 2) + suffix + key.Substring (key.Length - 2);
-                    Pipliz.Log.Write (string.Format ("Rewriting rotatable key '{0}' to '{1}'", key, rotatablekey));
-                    jsonType.SetAs (rotatable, rotatablekey);
-                  } else {
-                    Pipliz.Log.WriteError (string.Format ("Attribute {0} not found for base type {1}", rotatable, typeEntry.Key));
-                  }
-                }
-                if (suffix.Length < 1) {
-                  foreach (string propName in new string[] { "onDoorOpenAudio", "onRemoveAudio" }) {
-                    string openAudio;
-                    if (typeEntry.Value.TryGetAs (propName, out openAudio)) {
-                      jsonType.SetAs ("onRemoveAudio", openAudio);
-                      break;
-                    }
-                  }
+              JSONNode jsonOnRemoveGroup = new JSONNode (NodeType.Array);
+              jsonOnRemoveGroup.AddToArray (jsonOnRemove);
+              jsonType.SetAs ("onRemove", jsonOnRemoveGroup);
+            } else if (suffix.Length > 0) {
+              string plainKey = MOD_PREFIX + typeEntry.Key;
+              if (typeEntry.Key.EndsWith ("x+") || typeEntry.Key.EndsWith ("x-") || typeEntry.Key.EndsWith ("z+") || typeEntry.Key.EndsWith ("z-")) {
+                plainKey = plainKey.Substring (0, plainKey.Length - 2);
+              }
+              ItemTypesServer.ItemTypeRaw removeType;
+              if (itemTypes.TryGetValue (plainKey, out removeType)) {
+                plainKey = ItemTypes.IndexLookup.GetName (removeType.OnRemoveItems [0].item.Type);
+              }
+              JSONNode jsonOnRemove = new JSONNode ();
+              jsonOnRemove.SetAs ("type", plainKey);
+              jsonOnRemove.SetAs ("amount", 1);
+              jsonOnRemove.SetAs ("chance", 1);
+              JSONNode jsonOnRemoveGroup = new JSONNode (NodeType.Array);
+              jsonOnRemoveGroup.AddToArray (jsonOnRemove);
+              jsonType.SetAs ("onRemove", jsonOnRemoveGroup);
+              Pipliz.Log.Write (string.Format ("Setting onRemove type for '{0}' to '{1}'", typeEntry.Key + suffix, plainKey));
+            }
+            string realkey;
+            if (!(typeEntry.Key.EndsWith ("x+") || typeEntry.Key.EndsWith ("x-") || typeEntry.Key.EndsWith ("z+") || typeEntry.Key.EndsWith ("z-"))) {
+              jsonType
+                .SetAs ("isSolid", suffix.Length < 1)
+                .SetAs ("needsBase", false)
+                .SetAs ("isRotatable", true)
+                .SetAs ("sideall", "SELF")
+                .SetAs ("npcLimit", 0);
+              foreach (string rotatable in new string[] { "rotatablex+", "rotatablex-", "rotatablez+", "rotatablez-" }) {
+                string key;
+                if (typeEntry.Value.TryGetAs (rotatable, out key)) {
+                  string rotatablekey = MOD_PREFIX + key.Substring (0, key.Length - 2) + suffix + key.Substring (key.Length - 2);
+                  Pipliz.Log.Write (string.Format ("Rewriting rotatable key '{0}' to '{1}'", key, rotatablekey));
+                  jsonType.SetAs (rotatable, rotatablekey);
                 } else {
-                  foreach (string propName in new string[] { "onDoorCloseAudio", "onPlaceAudio" }) {
-                    string closeAudio;
-                    if (typeEntry.Value.TryGetAs (propName, out closeAudio)) {
-                      jsonType.SetAs ("onRemoveAudio", closeAudio);
-                      break;
-                    }
-                  }
+                  Pipliz.Log.WriteError (string.Format ("Attribute {0} not found for base type {1}", rotatable, typeEntry.Key));
                 }
-                realkey = MOD_PREFIX + typeEntry.Key + suffix;
-                Pipliz.Log.Write (string.Format ("Adding door base type '{0}'", realkey));
-                if (suffix.Length < 1) {
-                  doorClosedTypeKeys.Add (realkey);
-                } else {
-                  doorOpenTypeKeys.Add (realkey);
+              }
+              if (suffix.Length < 1) {
+                foreach (string propName in new string[] { "onDoorOpenAudio", "onRemoveAudio" }) {
+                  string openAudio;
+                  if (typeEntry.Value.TryGetAs (propName, out openAudio)) {
+                    jsonType.SetAs ("onRemoveAudio", openAudio);
+                    break;
+                  }
                 }
               } else {
-                realkey = MOD_PREFIX + typeEntry.Key.Substring (0, typeEntry.Key.Length - 2) + suffix + typeEntry.Key.Substring (typeEntry.Key.Length - 2);
-                Pipliz.Log.Write (string.Format ("Adding door rotatable type '{0}'", realkey));
+                foreach (string propName in new string[] { "onDoorCloseAudio", "onPlaceAudio" }) {
+                  string closeAudio;
+                  if (typeEntry.Value.TryGetAs (propName, out closeAudio)) {
+                    jsonType.SetAs ("onRemoveAudio", closeAudio);
+                    break;
+                  }
+                }
               }
-              itemTypes.Add (realkey, new ItemTypesServer.ItemTypeRaw (realkey, jsonType));
+              realkey = MOD_PREFIX + typeEntry.Key + suffix;
+              Pipliz.Log.Write (string.Format ("Adding door base type '{0}'", realkey));
+              if (suffix.Length < 1) {
+                doorClosedTypeKeys.Add (realkey);
+              } else {
+                doorOpenTypeKeys.Add (realkey);
+              }
+            } else {
+              realkey = MOD_PREFIX + typeEntry.Key.Substring (0, typeEntry.Key.Length - 2) + suffix + typeEntry.Key.Substring (typeEntry.Key.Length - 2);
+              Pipliz.Log.Write (string.Format ("Adding door rotatable type '{0}'", realkey));
             }
-          } catch (Exception exception) {
-            Pipliz.Log.WriteError (string.Format ("Exception while loading door type {0}; {1}", typeEntry.Key, exception.Message));
+            itemTypes.Add (realkey, new ItemTypesServer.ItemTypeRaw (realkey, jsonType));
           }
+        } catch (Exception exception) {
+          Pipliz.Log.WriteError (string.Format ("Exception while loading door type {0}; {1}", typeEntry.Key, exception.Message));
         }
-      } else {
-        Pipliz.Log.WriteError (string.Format ("Expected json object in {0}, but got {1} instead", "doorstypes.json", jsonTypes.NodeType));
       }
     }
 
@@ -206,20 +209,23 @@ namespace ScarabolMods
       try {
         Pipliz.Log.Write (string.Format ("Started loading door recipes..."));
         JSONNode jsonCrafting;
-        JSON.Deserialize (Path.Combine (DoorsDirectory, "doorscrafting.json"), out jsonCrafting, true);
-        if (jsonCrafting.NodeType == NodeType.Array) {
-          foreach (JSONNode craftingEntry in jsonCrafting.LoopArray()) {
-            JSONNode jsonResults = craftingEntry.GetAs<JSONNode> ("results");
-            foreach (JSONNode jsonResult in jsonResults.LoopArray()) {
-              string type = jsonResult.GetAs<string> ("type");
-              string realtype = MOD_PREFIX + type;
-              Pipliz.Log.Write (string.Format ("Replacing door recipe result type '{0}' with '{1}'", type, realtype));
-              jsonResult.SetAs ("type", realtype);
-            }
-            RecipePlayer.AddDefaultRecipe (new Recipe (craftingEntry));
-          }
-        } else {
+        if (!JSON.Deserialize (Path.Combine (DoorsDirectory, "doorscrafting.json"), out jsonCrafting, false)) {
+          Pipliz.Log.Write ("No door recipes file found, so no recipes loaded");
+          return;
+        }
+        if (jsonCrafting.NodeType != NodeType.Array) {
           Pipliz.Log.WriteError (string.Format ("Expected json array in {0}, but got {1} instead", "doorscrafting.json", jsonCrafting.NodeType));
+          return;
+        }
+        foreach (JSONNode craftingEntry in jsonCrafting.LoopArray()) {
+          JSONNode jsonResults = craftingEntry.GetAs<JSONNode> ("results");
+          foreach (JSONNode jsonResult in jsonResults.LoopArray()) {
+            string type = jsonResult.GetAs<string> ("type");
+            string realtype = MOD_PREFIX + type;
+            Pipliz.Log.Write (string.Format ("Replacing door recipe result type '{0}' with '{1}'", type, realtype));
+            jsonResult.SetAs ("type", realtype);
+          }
+          RecipePlayer.AddDefaultRecipe (new Recipe (craftingEntry));
         }
       } catch (Exception exception) {
         Pipliz.Log.WriteError (string.Format ("Exception while loading door recipes from {0}; {1}", "doorscrafting.json", exception.Message));
@@ -247,14 +253,10 @@ namespace ScarabolMods
     {
       Players.Player requestedBy = userData.requestedBy;
       Vector3Int position = userData.VoxelToChange;
-      if (userData.isPrimaryAction) {
-        if (allDoorTypes.Contains (userData.typeTillNow)) {
-          return DoorBlockTracker.RemoveDoor (position, requestedBy);
-        }
-      } else {
-        if (allDoorTypes.Contains (userData.typeToBuild)) {
-          return DoorBlockTracker.AddDoor (position, userData.typeToBuild, requestedBy);
-        }
+      if (userData.isPrimaryAction && allDoorTypes.Contains (userData.typeTillNow)) {
+        return DoorBlockTracker.RemoveDoor (position, requestedBy);
+      } else if (allDoorTypes.Contains (userData.typeToBuild)) {
+        return DoorBlockTracker.AddDoor (position, userData.typeToBuild, requestedBy);
       }
       return true;
     }
@@ -265,8 +267,7 @@ namespace ScarabolMods
       var clickedData = boxedData.item1;
       if (clickedData.clickType == Shared.PlayerClickedData.ClickType.Left) {
         if (clickedData.rayCastHit.rayHitType == Shared.RayHitType.Block) {
-          Vector3Int voxelHit = clickedData.rayCastHit.voxelHit;
-          DoorBlockTracker.ToggleDoor (voxelHit, player);
+          DoorBlockTracker.ToggleDoor (clickedData.rayCastHit.voxelHit, player);
         }
       }
     }

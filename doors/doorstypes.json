@@ -29,8 +29,6 @@
     "mesh.open" : "woodendoorbottom-mx-.obj",
   },
   "woodendoortop" : {
-    "onPlaceAudio" : "woodPlace",
-    "onRemoveAudio" : "woodDeleteLight",
     "rotatablex+" : "woodendoortopx+",
     "rotatablex-" : "woodendoortopx-",
     "rotatablez+" : "woodendoortopz+",
@@ -60,7 +58,7 @@
   "woodendoor2" : {
     "onPlaceAudio" : "woodPlace",
     "onRemoveAudio" : "woodDeleteLight",
-    "icon" : "woodendoor.png",
+    "icon" : "woodendoor2.png",
     "rotatablex+" : "woodendoor2x+",
     "rotatablex-" : "woodendoor2x-",
     "rotatablez+" : "woodendoor2z+",
@@ -87,8 +85,6 @@
     "mesh.open" : "woodendoorbottomx-.obj",
   },
   "woodendoor2top" : {
-    "onPlaceAudio" : "woodPlace",
-    "onRemoveAudio" : "woodDeleteLight",
     "rotatablex+" : "woodendoor2topx+",
     "rotatablex-" : "woodendoor2topx-",
     "rotatablez+" : "woodendoor2topz+",
@@ -116,9 +112,9 @@
     "mesh.open" : "woodendoortopx-.obj",
   },
   "woodgate" : {
-    "icon" : "woodgate.png",
     "onPlaceAudio" : "woodPlace",
     "onRemoveAudio" : "woodDeleteLight",
+    "icon" : "woodgate.png",
     "rotatablex+" : "woodgatex+",
     "rotatablex-" : "woodgatex-",
     "rotatablez+" : "woodgatez+",
