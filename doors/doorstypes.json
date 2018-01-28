@@ -139,5 +139,117 @@
     "parentType" : "woodgate",
     "mesh" : "woodgateclosedz-.obj",
     "mesh.open" : "woodgateopenz-.obj"
+  },
+  "irondoor" : {
+    "onPlaceAudio" : "stonePlace1",
+    "onRemoveAudio" : "woodDelete1",
+    "icon" : "irondoor.png",
+    "rotatablex+" : "irondoorx+",
+    "rotatablex-" : "irondoorx-",
+    "rotatablez+" : "irondoorz+",
+    "rotatablez-" : "irondoorz-"
+  },
+  "irondoorx+" : {
+    "parentType" : "irondoor",
+    "mesh" : "irondoorbottomx+.obj",
+    "mesh.open" : "irondoorbottom-mz-.obj",
+  },
+  "irondoorx-" : {
+    "parentType" : "irondoor",
+    "mesh" : "irondoorbottomx-.obj",
+    "mesh.open" : "irondoorbottom-mz+.obj",
+  },
+  "irondoorz+" : {
+    "parentType" : "irondoor",
+    "mesh" : "irondoorbottomz+.obj",
+    "mesh.open" : "irondoorbottom-mx+.obj",
+  },
+  "irondoorz-" : {
+    "parentType" : "irondoor",
+    "mesh" : "irondoorbottomz-.obj",
+    "mesh.open" : "irondoorbottom-mx-.obj",
+  },
+  "irondoortop" : {
+    "rotatablex+" : "irondoortopx+",
+    "rotatablex-" : "irondoortopx-",
+    "rotatablez+" : "irondoortopz+",
+    "rotatablez-" : "irondoortopz-",
+    "onRemove" : [ { "type" : "irondoor" } ]
+  },
+  "irondoortopx+" : {
+    "parentType" : "irondoortop",
+    "mesh" : "irondoortopx+.obj",
+    "mesh.open" : "irondoortop-mz-.obj",
+  },
+  "irondoortopx-" : {
+    "parentType" : "irondoortop",
+    "mesh" : "irondoortopx-.obj",
+    "mesh.open" : "irondoortop-mz+.obj",
+  },
+  "irondoortopz+" : {
+    "parentType" : "irondoortop",
+    "mesh" : "irondoortopz+.obj",
+    "mesh.open" : "irondoortop-mx+.obj",
+  },
+  "irondoortopz-" : {
+    "parentType" : "irondoortop",
+    "mesh" : "irondoortopz-.obj",
+    "mesh.open" : "irondoortop-mx-.obj",
+  },
+  "irondoor2" : {
+    "onPlaceAudio" : "stonePlace1",
+    "onRemoveAudio" : "woodDelete1",
+    "icon" : "irondoor2.png",
+    "rotatablex+" : "irondoor2x+",
+    "rotatablex-" : "irondoor2x-",
+    "rotatablez+" : "irondoor2z+",
+    "rotatablez-" : "irondoor2z-"
+  },
+  "irondoor2x+" : {
+    "parentType" : "irondoor2",
+    "mesh" : "irondoorbottom-mx-.obj",
+    "mesh.open" : "irondoorbottomz-.obj",
+  },
+  "irondoor2x-" : {
+    "parentType" : "irondoor2",
+    "mesh" : "irondoorbottom-mx+.obj",
+    "mesh.open" : "irondoorbottomz+.obj",
+  },
+  "irondoor2z+" : {
+    "parentType" : "irondoor2",
+    "mesh" : "irondoorbottom-mz-.obj",
+    "mesh.open" : "irondoorbottomx+.obj",
+  },
+  "irondoor2z-" : {
+    "parentType" : "irondoor2",
+    "mesh" : "irondoorbottom-mz+.obj",
+    "mesh.open" : "irondoorbottomx-.obj",
+  },
+  "irondoor2top" : {
+    "rotatablex+" : "irondoor2topx+",
+    "rotatablex-" : "irondoor2topx-",
+    "rotatablez+" : "irondoor2topz+",
+    "rotatablez-" : "irondoor2topz-",
+    "onRemove" : [ { "type" : "irondoor2" } ]
+  },
+  "irondoor2topx+" : {
+    "parentType" : "irondoor2top",
+    "mesh" : "irondoortop-mx-.obj",
+    "mesh.open" : "irondoortopz-.obj",
+  },
+  "irondoor2topx-" : {
+    "parentType" : "irondoor2top",
+    "mesh" : "irondoortop-mx+.obj",
+    "mesh.open" : "irondoortopz+.obj",
+  },
+  "irondoor2topz+" : {
+    "parentType" : "irondoor2top",
+    "mesh" : "irondoortop-mz-.obj",
+    "mesh.open" : "irondoortopx+.obj",
+  },
+  "irondoor2topz-" : {
+    "parentType" : "irondoor2top",
+    "mesh" : "irondoortop-mz+.obj",
+    "mesh.open" : "irondoortopx-.obj",
   }
 }

@@ -2,6 +2,8 @@
   "types" : {
     "woodgate" : "wooden gate",
     "woodendoor" : "wooden door (left swing)",
-    "woodendoor2" : "wooden door (right swing)"
+    "woodendoor2" : "wooden door (right swing)",
+    "irondoor" : "iron door (left swing)",
+    "irondoor2" : "iron door (right swing)"
   }
 }

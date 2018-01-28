@@ -2,6 +2,8 @@
   "types" : {
     "woodgate" : "Holztor",
     "woodendoor" : "Holztür (links)",
-    "woodendoor2" : "Holztür (rechts)"
+    "woodendoor2" : "Holztür (rechts)",
+    "irondoor" : "Eisentür (links)",
+    "irondoor2" : "Eisentür (rechts)"
   }
 }

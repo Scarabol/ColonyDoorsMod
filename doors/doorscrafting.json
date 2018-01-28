@@ -13,5 +13,15 @@
     "name":"woodgate.recipe",
     "results":[{"type":"woodgate"}],
     "requires":[{"type":"planks","amount":3}]
+  },
+  {
+    "name":"irondoor.recipe",
+    "results":[{"type":"irondoor"}],
+    "requires":[{"type":"ironingot","amount":3}]
+  },
+  {
+    "name":"irondoor2.recipe",
+    "results":[{"type":"irondoor2"}],
+    "requires":[{"type":"ironingot","amount":3}]
   }
 ]

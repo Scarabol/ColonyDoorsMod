@@ -28,5 +28,29 @@
     "normal" : "neutral",
     "emissive" : "neutral",
     "height" : "neutral"
+  },
+  "irondoor" : {
+    "albedo" : "irondoor",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  },
+  "irondoortop" : {
+    "albedo" : "irondoor",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  },
+  "irondoor2" : {
+    "albedo" : "irondoor",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  },
+  "irondoor2top" : {
+    "albedo" : "irondoor",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
   }
 }
